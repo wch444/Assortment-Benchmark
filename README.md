@@ -49,7 +49,6 @@ For install dependencies, the project requires the following:
 - Python (>=3.11.13)
 - NumPy (>=2.3.2)
 - Pandas (>=12.0.3)
-- Torch (>=2.8.0)
 - Gurobi (>=12.0.3)
 
 You can use the requirements.txt files with pip to install a fully predetermined and working environment.
