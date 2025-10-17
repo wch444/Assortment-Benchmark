@@ -26,13 +26,7 @@ def get_revenue_function_mmnl(data):
     v0 = copy.copy(data.v0)
     omega = copy.copy(data.omega)
     revenue_fn_cpu = partial(expected_revenue_mmnl_cpu, utility=u, price=price, v0=v0, omega=omega)
-    # u = torch.tensor(u).to(device)
-    # price = torch.tensor(price).to(device)
-    # v0 = torch.tensor(v0).to(device)
-    # omega = torch.tensor(omega).to(device)
-    # revenue_fn = partial(expected_revenue_mmnl, utility=u, price=price, v0=v0, omega=omega)
 
-    # return revenue_fn, revenue_fn_cpu
     return revenue_fn_cpu
 
 def expected_revenue_mmnl(hard_solution, utility, price, v0, omega):
