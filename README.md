@@ -42,8 +42,7 @@ root/
 To get started with this project, follow these steps.
 
 ```bash
-git clone https://github.com/wch444/Benchmark.git
-cd Benchmark
+git clone https://github.com/wch444/Assortment-Benchmark.git
 ```
 
 For install dependencies, the project requires the following:
