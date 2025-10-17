@@ -101,14 +101,17 @@ def _build_nl_model(
     model = gp.Model("NestedLogitAssortment")
     model.setParam("OutputFlag", 0)
     
-    # Decision variables
+    # Add variable x: the revenue threshold to minimize
     x = model.addVar(lb=0, vtype=GRB.CONTINUOUS, name="x")
-    y = model.addVars(m, vtype=GRB.CONTINUOUS, name="y")
+    # Add variables y[i]: auxiliary variables for each nest
+    y = {}
+    for i in range(m):
+        y[i] = model.addVar(vtype=GRB.CONTINUOUS, name=f"y_{i}")
     
     # Main constraint: v0 * x >= sum_i y_i
     model.addConstr(
         v0 * x >= gp.quicksum(y[i] for i in range(m)),
-        name="main_constraint"
+        name="c0"
     )
     
     # Add constraints for each nest and subset
@@ -150,12 +153,60 @@ def _add_nest_constraints(
         
         for k in range(n + 1):
             vi, ri = _calculate_nest_metrics(i, k, n, utility, price, vi0_val)
-            
+
             # Constraint: y_i >= V_i^gamma_i * (R_i - x)
-            model.addConstr(
-                y[i] >= (vi ** gamma[i]) * (ri - x),
-                name=f"nest_{i}_subset_{k}"
-            )
+            model.addConstr( y[i] >= (vi ** gamma[i]) * (ri - x),name=f"nest_{i}_subset_{k}")
+
+
+def _extract_assortment(
+    m: int,
+    n: int,
+    utility: np.ndarray,
+    price: np.ndarray,
+    vi0: Union[np.ndarray, float],
+    gamma: np.ndarray,
+    x_opt: float,
+    y_values: dict
+) -> np.ndarray:
+    """
+    Extract the optimal assortment from the solved model.
+    
+    Args:
+        m: Number of nests.
+        n: Number of products per nest.
+        utility: Sorted utility matrix.
+        price: Sorted price matrix.
+        vi0: Outside option utility for each nest.
+        gamma: Dissimilarity parameters.
+        x_opt: Optimal revenue threshold.
+        y_values: Optimal y variable values.
+    
+    Returns:
+        Binary assortment matrix of shape (m, n).
+    """
+    assortment = np.zeros((m, n), dtype=int)
+    tolerance = 1e-4
+    
+    for i in range(m):
+        vi0_val = vi0[i] if isinstance(vi0, np.ndarray) else vi0
+       
+        min_violation = float('inf')
+        best_k = 0
+        
+        for k in range(n + 1):
+            vi, ri = _calculate_nest_metrics(i, k, n, utility, price, vi0_val)
+            
+            # Calculate constraint violation
+            lhs = (vi ** gamma[i]) * (ri - x_opt)
+            violation = abs(lhs - y_values[i])
+            
+            # Find the tightest constraint (smallest violation)
+            if violation < tolerance and violation < min_violation:
+                min_violation = violation
+                best_k = k
+
+        assortment[i, :best_k] = 1
+    return assortment
 
 
 def _calculate_nest_metrics(
@@ -196,90 +247,6 @@ def _calculate_nest_metrics(
     
     return vi, ri
 
-
-def _extract_assortment(
-    m: int,
-    n: int,
-    utility: np.ndarray,
-    price: np.ndarray,
-    vi0: Union[np.ndarray, float],
-    gamma: np.ndarray,
-    x_opt: float,
-    y_values: dict
-) -> np.ndarray:
-    """
-    Extract the optimal assortment from the solved model.
-    
-    Args:
-        m: Number of nests.
-        n: Number of products per nest.
-        utility: Sorted utility matrix.
-        price: Sorted price matrix.
-        vi0: Outside option utility for each nest.
-        gamma: Dissimilarity parameters.
-        x_opt: Optimal revenue threshold.
-        y_values: Optimal y variable values.
-    
-    Returns:
-        Binary assortment matrix of shape (m, n).
-    """
-    assortment = np.zeros((m, n), dtype=int)
-    tolerance = 1e-4
-    
-    for i in range(m):
-        vi0_val = vi0[i] if isinstance(vi0, np.ndarray) else vi0
-        best_k = _find_binding_constraint(
-            i, n, utility, price, vi0_val, gamma, x_opt, y_values[i], tolerance
-        )
-        assortment[i, :best_k] = 1
-    
-    return assortment
-
-
-def _find_binding_constraint(
-    nest_idx: int,
-    n: int,
-    utility: np.ndarray,
-    price: np.ndarray,
-    vi0_val: float,
-    gamma: np.ndarray,
-    x_opt: float,
-    y_opt: float,
-    tolerance: float
-) -> int:
-    """
-    Find which constraint is binding (active) for a given nest.
-    
-    Args:
-        nest_idx: Index of the nest.
-        n: Number of products per nest.
-        utility: Utility matrix.
-        price: Price matrix.
-        vi0_val: Outside option utility for this nest.
-        gamma: Dissimilarity parameters.
-        x_opt: Optimal revenue threshold.
-        y_opt: Optimal y value for this nest.
-        tolerance: Numerical tolerance for binding constraint.
-    
-    Returns:
-        Number of products to include in optimal assortment.
-    """
-    min_violation = float('inf')
-    best_k = 0
-    
-    for k in range(n + 1):
-        vi, ri = _calculate_nest_metrics(nest_idx, k, n, utility, price, vi0_val)
-        
-        # Calculate constraint violation
-        lhs = (vi ** gamma[nest_idx]) * (ri - x_opt)
-        violation = abs(lhs - y_opt)
-        
-        # Find the tightest constraint (smallest violation)
-        if violation < tolerance and violation < min_violation:
-            min_violation = violation
-            best_k = k
-    
-    return best_k
 
 
 # import numpy as np
