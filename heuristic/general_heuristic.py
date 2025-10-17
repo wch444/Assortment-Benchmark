@@ -1,14 +1,7 @@
 import numpy as np
-import time
-import torch
-import gurobipy as gp
-from gurobipy import GRB
 import copy
 from functools import partial
-import warnings
-from typing import List, Tuple, Callable, Union, Optional, Set
 from models.mmnl_functions import expected_revenue_mmnl_cpu
-from models.nl_functions import expected_revenue_nl_cpu
 
 
 def revenue_order(num_prod, choice_model, data, A=None, B=None, revenue_fn_order=None):

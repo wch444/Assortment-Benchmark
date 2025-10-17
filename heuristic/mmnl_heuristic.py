@@ -1,486 +1,405 @@
 import numpy as np
 import gurobipy as gp
-from gurobipy import GRB
-import time,pdb
+import time
+from typing import Optional, Tuple, Dict, Union
 
 
-
-
-
-def Conic_mmnl_warm_start(
-    coef, uti, v_i0, p, cardinality, A=None, b=None, time_limit=600,
-    x0=None):
+def conic_mmnl_warm_start(
+    coef: np.ndarray,
+    uti: np.ndarray,
+    v_i0: Union[np.ndarray, float],
+    p: np.ndarray,
+    cardinality: int,
+    A: Optional[np.ndarray] = None,
+    b: Optional[np.ndarray] = None,
+    time_limit: int = 600,
+    x0: Optional[Union[list, np.ndarray]] = None
+) -> Tuple[float, Optional[np.ndarray], Dict]:
     """
     Solve the assortment optimization problem for a Mixed Multinomial Logit (MMNL) model
-    using a conic reformulation, with optional warm start and additional linear constraints.
+    using a conic reformulation with optional warm start and additional linear constraints.
 
     Args:
-        coef (np.ndarray): Segment weights of shape (m,).
-        uti (np.ndarray): Utility matrix of shape (m, n).
-        v_i0 (np.ndarray or float): Outside option utility for each segment,  or a scalar applied to all segments.
-        p (np.ndarray): Price vector of shape (n,) or (1, n).
-        cardinality (int): Maximum number of products allowed in the assortment.
-        A (np.ndarray, optional): Linear constraint matrix of shape (n_constr, n).
-        b (np.ndarray, optional): Right-hand side vector of shape (n_constr,).
-        time_limit (int, optional): Time limit for solving in seconds. Default is 600.
-        x0 (list[int] or np.ndarray, optional): Warm start initial solution. Either:
-            - A list of product indices (0-based), e.g. [0, 3, 5].
-            - A binary vector of length n, e.g. [1, 0, 0, 1, ...].
+        coef: Segment weights of shape (m,).
+        uti: Utility matrix of shape (m, n) where m is number of segments, n is number of products.
+        v_i0: Outside option utility for each segment. Scalar or array of shape (m,).
+        p: Price vector of shape (n,) or (1, n).
+        cardinality: Maximum number of products allowed in the assortment.
+        A: Optional linear constraint matrix of shape (n_constr, n).
+        b: Optional right-hand side vector of shape (n_constr,).
+        time_limit: Time limit for solving in seconds. Default is 600.
+        x0: Optional warm start initial solution. Either:
+            - A list of product indices (0-based), e.g., [0, 3, 5].
+            - A binary vector of length n, e.g., [1, 0, 0, 1, ...].
 
     Returns:
-        float: Estimated optimal (or best feasible) revenue.
-        np.ndarray: Optimal assortment as a binary array of shape (n,).
-        dict: Solver statistics including status, gap, solving time, and bounds.
+        opt_rev: Estimated optimal (or best feasible) revenue.
+        ass: Optimal assortment as a binary array of shape (n,).
+        info: Solver statistics including status, gap, solving time, and bounds.
     """
-    start = time.time()
+    start_time = time.time()
 
-    # Standardize inputs
+    # Input validation and standardization
     uti = np.asarray(uti, dtype=float)
-    num_of_segments, num_of_products = uti.shape
+    num_segments, num_products = uti.shape
 
-    prices = np.asarray(p).reshape(-1)
-    if prices.size == num_of_products:
-        pass
-    elif prices.ndim == 1 and prices.size == 1 and hasattr(p, "__getitem__"):
-        prices = np.asarray(p[0]).reshape(-1)
-    else:
-        raise ValueError("Price vector p must have shape (n,) or (1, n).")
-
+    # Process price vector
+    prices = _standardize_prices(p, num_products)
     max_price = float(np.max(prices))
 
-    coef = np.asarray(coef, dtype=float).reshape(-1)
-    if coef.size != num_of_segments:
-        coef = np.resize(coef, num_of_segments)
+    # Process segment coefficients
+    coef = _standardize_array(coef, num_segments, "coef")
 
+    # Process outside option utilities
+    v_i0 = _standardize_outside_utility(v_i0, num_segments)
+
+    # Build and configure Gurobi model
+    model = _build_gurobi_model(
+        num_segments, num_products, coef, uti, v_i0, prices, max_price,
+        cardinality, A, b, time_limit
+    )
+
+    # Apply warm start if provided
+    if x0 is not None:
+        _apply_warm_start(model, x0, num_products, cardinality)
+
+    # Solve the model
+    model.optimize()
+    
+    # Extract and return results
+    return _extract_results(model, uti, prices, v_i0, coef, num_products, start_time)
+
+
+def _standardize_prices(p: np.ndarray, num_products: int) -> np.ndarray:
+    """Standardize price vector to 1D array."""
+    prices = np.asarray(p).reshape(-1)
+    
+    if prices.size == num_products:
+        return prices
+    elif prices.ndim == 1 and prices.size == 1 and hasattr(p, "__getitem__"):
+        return np.asarray(p[0]).reshape(-1)
+    else:
+        raise ValueError(f"Price vector p must have shape ({num_products},) or (1, {num_products}).")
+
+
+def _standardize_array(arr: np.ndarray, expected_size: int, name: str) -> np.ndarray:
+    """Standardize array to expected size."""
+    arr = np.asarray(arr, dtype=float).reshape(-1)
+    if arr.size != expected_size:
+        arr = np.resize(arr, expected_size)
+    return arr
+
+
+def _standardize_outside_utility(v_i0: Union[np.ndarray, float], num_segments: int) -> np.ndarray:
+    """Standardize outside utility to array of shape (num_segments,)."""
     v_i0 = np.asarray(v_i0, dtype=float).reshape(-1)
-    if v_i0.size != num_of_segments:
-        if v_i0.size == 1:
-            v_i0 = np.full(num_of_segments, v_i0.item(), dtype=float)
-        else:
-            v_i0 = np.resize(v_i0, num_of_segments)
+    
+    if v_i0.size == 1:
+        return np.full(num_segments, v_i0.item(), dtype=float)
+    elif v_i0.size != num_segments:
+        return np.resize(v_i0, num_segments)
+    return v_i0
 
-    # Build Gurobi model
-    m = gp.Model('ConicMMNL')
-    # m.setParam('MIPFocus', 2)
-    # m.setParam('MIPGap', 0.015)
-    # m.setParam('Heuristics', 0)
-    # m.setParam('Cuts', 3)
-    m.Params.OutputFlag = 0
-    m.Params.TimeLimit = time_limit
-    # allow non-convex (bilinear) constraints
-    m.Params.NonConvex = 2
+
+def _build_gurobi_model(
+    num_segments: int, num_products: int, coef: np.ndarray, uti: np.ndarray,
+    v_i0: np.ndarray, prices: np.ndarray, max_price: float,
+    cardinality: int, A: Optional[np.ndarray], b: Optional[np.ndarray],
+    time_limit: int
+) -> gp.Model:
+    """Build and configure the Gurobi optimization model."""
+    model = gp.Model('ConicMMNL')
+    model.Params.OutputFlag = 0
+    model.Params.TimeLimit = time_limit
+    model.Params.NonConvex = 2  # Allow non-convex (bilinear) constraints
 
     # Decision variables
-    x = m.addVars(num_of_products, vtype=gp.GRB.BINARY, name='x')
-    y = m.addVars(num_of_segments, lb=0.0, vtype=gp.GRB.CONTINUOUS, name='y')
-    z = m.addVars(num_of_segments * num_of_products, lb=0.0, vtype=gp.GRB.CONTINUOUS, name='z')
-    w = m.addVars(num_of_segments, lb=0.0, vtype=gp.GRB.CONTINUOUS, name='w')
+    x = model.addVars(num_products, vtype=gp.GRB.BINARY, name='x')
+    y = model.addVars(num_segments, lb=0.0, vtype=gp.GRB.CONTINUOUS, name='y')
+    z = model.addVars(num_segments * num_products, lb=0.0, vtype=gp.GRB.CONTINUOUS, name='z')
+    w = model.addVars(num_segments, lb=0.0, vtype=gp.GRB.CONTINUOUS, name='w')
 
-    # Objective: equivalent minimization form
-    obj = gp.quicksum(coef[i] * v_i0[i] * max_price * y[i] for i in range(num_of_segments))
+    # Objective function
+    obj = gp.quicksum(coef[i] * v_i0[i] * max_price * y[i] for i in range(num_segments))
     obj += gp.quicksum(
-        coef[i] * uti[i, j] * (max_price - prices[j]) * z[i * num_of_products + j]
-        for i in range(num_of_segments) for j in range(num_of_products)
+        coef[i] * uti[i, j] * (max_price - prices[j]) * z[i * num_products + j]
+        for i in range(num_segments) for j in range(num_products)
     )
-    m.setObjective(obj, gp.GRB.MINIMIZE)
+    model.setObjective(obj, gp.GRB.MINIMIZE)
 
-    # Basic constraints
-    m.addConstr(gp.quicksum(x[j] for j in range(num_of_products)) >= 1, name='avoid_0')
-    if cardinality is not None:
-        m.addConstr(gp.quicksum(x[j] for j in range(num_of_products)) <= int(cardinality), name='cardinality')
-
-    # MMNL constraints
-    m.addConstrs((w[i] == v_i0[i] + gp.quicksum(uti[i, j] * x[j] for j in range(num_of_products))
-                  for i in range(num_of_segments)), name='w_def')
-
-    m.addConstrs((z[i * num_of_products + j] * w[i] >= x[j] * x[j]
-                  for i in range(num_of_segments) for j in range(num_of_products)), name='zw_x2')
-
-    m.addConstrs((y[i] * w[i] >= 1 for i in range(num_of_segments)), name='y_w_ge_1')
-
-    m.addConstrs((v_i0[i] * y[i] + gp.quicksum(uti[i, j] * z[i * num_of_products + j] for j in range(num_of_products)) >= 1
-                  for i in range(num_of_segments)), name='mass_1')
-
-    m.addConstrs((z[i * num_of_products + j] <= (1.0 / (v_i0[i] + uti[i, j])) * x[j]
-                  for i in range(num_of_segments) for j in range(num_of_products)), name='z_upper_local')
-
-    # Refined upper/lower bounds on z using top-k utilities
-    for i in range(num_of_segments):
-        for j in range(num_of_products):
-            others = np.append(uti[i, :j], uti[i, (j + 1):])
-            top_k_minus1_sum = np.sum(np.sort(others)[::-1][:(max(int(cardinality) - 1, 0))]) if cardinality is not None else np.sum(np.maximum(others, 0))
-            top_k_sum = np.sum(np.sort(others)[::-1][:(max(int(cardinality), 0))]) if cardinality is not None else np.sum(np.maximum(others, 0))
-
-            idx = i * num_of_products + j
-            # z <= y - (1 / (v0 + sum top_k others)) * (1 - x_j)
-            denom1 = v_i0[i] + top_k_sum
-            denom1 = float(max(denom1, 1e-12))
-            m.addConstr(z[idx] <= y[i] - (1.0 / denom1) * (1 - x[j]), name=f"z_y_ub[{i},{j}]")
-
-            # z >= y - (1 / v0) * (1 - x_j)
-            denom2 = float(max(v_i0[i], 1e-12))
-            m.addConstr(z[idx] >= y[i] - (1.0 / denom2) * (1 - x[j]), name=f"z_y_lb[{i},{j}]")
-
-    # Linear constraints Ax <= b
+    # Add constraints
+    _add_basic_constraints(model, x, num_products, cardinality)
+    _add_mmnl_constraints(model, x, y, z, w, num_segments, num_products, uti, v_i0, cardinality)
+    
     if A is not None and b is not None:
-        A = np.asarray(A)
-        b = np.asarray(b).reshape(-1)
-        if A.shape[1] != num_of_products:
-            raise ValueError(f"A must have n={num_of_products} columns, got {A.shape[1]}")
-        if A.shape[0] != b.size:
-            raise ValueError("Number of rows in A must match length of b.")
-        for i in range(A.shape[0]):
-            m.addConstr(gp.quicksum(A[i, j] * x[j] for j in range(num_of_products)) <= b[i], name=f"Axb[{i}]")
+        _add_linear_constraints(model, x, A, b, num_products)
 
-    # Warm start: initialize x with x0
-    x0_bin = _coerce_initial_x(x0, num_of_products, cardinality)
+    return model
+
+
+def _add_basic_constraints(model: gp.Model, x: gp.tupledict, num_products: int, cardinality: int):
+    """Add basic constraints to the model."""
+    model.addConstr(
+        gp.quicksum(x[j] for j in range(num_products)) >= 1,
+        name='avoid_empty_assortment'
+    )
+    
+    if cardinality is not None:
+        model.addConstr(
+            gp.quicksum(x[j] for j in range(num_products)) <= int(cardinality),
+            name='cardinality'
+        )
+
+
+def _add_mmnl_constraints(
+    model: gp.Model, x: gp.tupledict, y: gp.tupledict, z: gp.tupledict, w: gp.tupledict,
+    num_segments: int, num_products: int, uti: np.ndarray, v_i0: np.ndarray, cardinality: int
+):
+    """Add MMNL-specific constraints to the model."""
+    # Define w variables
+    model.addConstrs(
+        (w[i] == v_i0[i] + gp.quicksum(uti[i, j] * x[j] for j in range(num_products))
+         for i in range(num_segments)),
+        name='w_definition'
+    )
+
+    # Bilinear constraints
+    model.addConstrs(
+        (z[i * num_products + j] * w[i] >= x[j] * x[j]
+         for i in range(num_segments) for j in range(num_products)),
+        name='bilinear_zw'
+    )
+
+    model.addConstrs(
+        (y[i] * w[i] >= 1 for i in range(num_segments)),
+        name='reciprocal_y'
+    )
+
+    # Probability constraints
+    model.addConstrs(
+        (v_i0[i] * y[i] + gp.quicksum(uti[i, j] * z[i * num_products + j] for j in range(num_products)) >= 1
+         for i in range(num_segments)),
+        name='probability_mass'
+    )
+
+    # Upper bounds on z
+    model.addConstrs(
+        (z[i * num_products + j] <= (1.0 / max(v_i0[i] + uti[i, j], 1e-12)) * x[j]
+         for i in range(num_segments) for j in range(num_products)),
+        name='z_upper_bound'
+    )
+
+    # Refined bounds using top-k utilities
+    _add_refined_z_bounds(model, z, y, x, num_segments, num_products, uti, v_i0, cardinality)
+
+
+def _add_refined_z_bounds(
+    model: gp.Model, z: gp.tupledict, y: gp.tupledict, x: gp.tupledict,
+    num_segments: int, num_products: int, uti: np.ndarray, v_i0: np.ndarray, cardinality: int
+):
+    """Add refined upper and lower bounds on z using top-k utilities."""
+    for i in range(num_segments):
+        for j in range(num_products):
+            others = np.append(uti[i, :j], uti[i, (j + 1):])
+            
+            if cardinality is not None:
+                top_k_minus1_sum = np.sum(np.sort(others)[::-1][:max(int(cardinality) - 1, 0)])
+                top_k_sum = np.sum(np.sort(others)[::-1][:max(int(cardinality), 0)])
+            else:
+                top_k_minus1_sum = np.sum(np.maximum(others, 0))
+                top_k_sum = np.sum(np.maximum(others, 0))
+
+            idx = i * num_products + j
+            
+            # Upper bound
+            denom_upper = max(v_i0[i] + top_k_sum, 1e-12)
+            model.addConstr(
+                z[idx] <= y[i] - (1.0 / denom_upper) * (1 - x[j]),
+                name=f"z_refined_upper[{i},{j}]"
+            )
+
+            # Lower bound
+            denom_lower = max(v_i0[i], 1e-12)
+            model.addConstr(
+                z[idx] >= y[i] - (1.0 / denom_lower) * (1 - x[j]),
+                name=f"z_refined_lower[{i},{j}]"
+            )
+
+
+def _add_linear_constraints(
+    model: gp.Model, x: gp.tupledict, A: np.ndarray, b: np.ndarray, num_products: int
+):
+    """Add linear constraints Ax <= b to the model."""
+    A = np.asarray(A)
+    b = np.asarray(b).reshape(-1)
+    
+    if A.shape[1] != num_products:
+        raise ValueError(f"A must have {num_products} columns, got {A.shape[1]}")
+    if A.shape[0] != b.size:
+        raise ValueError("Number of rows in A must match length of b")
+    
+    for i in range(A.shape[0]):
+        model.addConstr(
+            gp.quicksum(A[i, j] * x[j] for j in range(num_products)) <= b[i],
+            name=f"linear_constraint[{i}]"
+        )
+
+
+def _apply_warm_start(model: gp.Model, x0: Union[list, np.ndarray], num_products: int, cardinality: int):
+    """Apply warm start to the model."""
+    x0_bin = _coerce_initial_x(x0, num_products, cardinality)
     if x0_bin is not None:
-        for j in range(num_of_products):
-            x[j].Start = int(x0_bin[j])
-        
-    # Solve the model
-    m.optimize()
-    t = time.time() - start
-    best_bound = m.ObjBound if m.SolCount >= 0 else None
-    status = m.Status
-    nodes = m.NodeCount
+        x_vars = model.getVars()[:num_products]
+        for j, var in enumerate(x_vars):
+            var.Start = int(x0_bin[j])
 
-    # 根松弛（可选）
-    # try:
-    #     m_relax = m.relax()
-    #     m_relax.Params.OutputFlag = 0
-    #     m_relax.optimize()
-    #     z_root = m_relax.ObjVal if m_relax.Status == gp.GRB.OPTIMAL else None
-    # except gp.GurobiError:
-    z_root = None # Root relaxation (optional)
 
-    # Collect results
+def _extract_results(
+    model: gp.Model, uti: np.ndarray, prices: np.ndarray, v_i0: np.ndarray,
+    coef: np.ndarray, num_products: int, start_time: float
+) -> Tuple[Optional[float], Optional[np.ndarray], Dict]:
+    """Extract and format optimization results."""
+    solving_time = time.time() - start_time
+    best_bound = model.ObjBound if model.SolCount > 0 else None
+    status = model.Status
+    nodes = model.NodeCount
+
+    # Optional: root relaxation bound
+    z_root = None
+
     info = {
         "status": status,
         "nodes": nodes,
-        "time": t,
+        "time": solving_time,
         "best_bound": best_bound,
         "z_root": z_root
     }
 
+    # Extract solution if available
     if status == gp.GRB.OPTIMAL or status in (gp.GRB.TIME_LIMIT, gp.GRB.INTERRUPTED):
-        # 读取 x
-        x_vals = np.array([x[j].X for j in range(num_of_products)])
-        ass = (x_vals > 0.5).astype(int)
+        if model.SolCount > 0:
+            x_vars = model.getVars()[:num_products]
+            x_vals = np.array([var.X for var in x_vars])
+            ass = (x_vals > 0.5).astype(int)
 
-        # gap
-        if m.SolCount > 0 and best_bound is not None and m.ObjVal != 0:
-            end_gap = abs(m.ObjVal - best_bound) / max(abs(m.ObjVal), 1e-12) * 100.0
-        else:
-            end_gap = None
-        if z_root is not None and m.SolCount > 0 and m.ObjVal != 0:
-            root_gap = abs(m.ObjVal - z_root) / max(abs(m.ObjVal), 1e-12) * 100.0
-        else:
-            root_gap = None
-        info.update({"egap": end_gap, "rgap": root_gap, "z_opt": m.ObjVal})
+            # Calculate gaps
+            end_gap = _calculate_gap(model.ObjVal, best_bound) if best_bound is not None else None
+            root_gap = _calculate_gap(model.ObjVal, z_root) if z_root is not None else None
+            
+            info.update({
+                "egap": end_gap,
+                "rgap": root_gap,
+                "z_opt": model.ObjVal
+            })
 
-        opt_rev =  mmnl_rev(ass, uti, prices, v_i0, coef)
-        return opt_rev, ass, info
+            opt_rev = mmnl_rev(ass, uti, prices, v_i0, coef)
+            return opt_rev, ass, info
 
-    # No feasible solution or failure
+    # No feasible solution found
     info.update({"egap": None, "rgap": None, "z_opt": None})
     return best_bound, None, info
 
-def mmnl_rev(ass, u,prices, v0, omega):
+
+def _calculate_gap(obj_val: float, bound: float) -> float:
+    """Calculate optimality gap percentage."""
+    if obj_val == 0:
+        return None
+    return abs(obj_val - bound) / max(abs(obj_val), 1e-12) * 100.0
+
+
+def mmnl_rev(
+    ass: np.ndarray,
+    u: np.ndarray,
+    prices: np.ndarray,
+    v0: np.ndarray,
+    omega: np.ndarray
+) -> float:
     """
     Compute the expected revenue under the MMNL model for a given assortment.
     
-    Parameters:
-    - ass: 0/1 vector of length n, indicating which products are included
-    - u:   utility matrix of shape (n, m), where row j is the utility u_{ij} for product j in each segment i
-    - p:   price array of shape (n,) or (n,1)
-    - v0:  outside utility, scalar or array of shape (m,)
-    - omega: segment weights or probabilities, array of shape (m,)
-    """
-    total_profit = 0
-    ass = np.array(ass)
-    assort = np.where(ass>0)[0]
-    m = u.shape[0]
-    if v0.size == 1:
-        v0 = np.full(m, v0[0])  # all segments share the same v0 value, v0 shape -> (m,)
-    elif v0.size != m:
-        raise ValueError(f"v0 must be scalar or have length m={m}, got {v0.size}")
-    # Validate omega
-    if omega.size != m:
-        raise ValueError(f"omega must have length m={m}, got {omega.size}")
+    Args:
+        ass: Binary vector of length n indicating which products are included.
+        u: Utility matrix of shape (m, n), where m is segments and n is products.
+        prices: Price array of shape (n,) or (n, 1).
+        v0: Outside utility, scalar or array of shape (m,).
+        omega: Segment weights or probabilities, array of shape (m,).
     
-    if prices.ndim > 1:
-        selected_prices = prices[0, assort]
-    else:
-        selected_prices = prices[assort]
+    Returns:
+        Expected revenue for the given assortment.
+    """
+    ass = np.asarray(ass)
+    assort = np.where(ass > 0)[0]
+    
+    num_segments = u.shape[0]
+    
+    # Standardize v0
+    v0 = np.asarray(v0)
+    if v0.size == 1:
+        v0 = np.full(num_segments, v0.item())
+    elif v0.size != num_segments:
+        raise ValueError(f"v0 must be scalar or have length {num_segments}, got {v0.size}")
+    
+    # Validate omega
+    if omega.size != num_segments:
+        raise ValueError(f"omega must have length {num_segments}, got {omega.size}")
+    
+    # Extract selected prices
+    selected_prices = prices[assort] if prices.ndim == 1 else prices[0, assort]
 
-
+    # Calculate choice probabilities and revenue
     util_sel = u[:, assort]
     total_util = v0 + util_sel.sum(axis=1)
     choice_prob = util_sel / total_util[:, None]
     revenue = (omega[:, None] * choice_prob * selected_prices).sum()
+    
     return revenue
 
 
-def _coerce_initial_x(x0, n, cardinality):
+def _coerce_initial_x(
+    x0: Union[list, np.ndarray],
+    n: int,
+    cardinality: Optional[int]
+) -> Optional[np.ndarray]:
     """
-    Convert x0 to a 0/1 numpy vector of length n.
+    Convert x0 to a binary numpy vector of length n.
     
     Args:
-        x0: Initial solution, can be index list or 0/1 vector.
-        n (int): Number of products.
-        cardinality (int): Maximum number of products to select.
+        x0: Initial solution, can be index list or binary vector.
+        n: Number of products.
+        cardinality: Maximum number of products to select.
     
     Returns:
-        np.ndarray: Binary vector of length n.
+        Binary vector of length n, or None if x0 is None.
     """
     if x0 is None:
         return None
 
     x0_arr = np.asarray(x0)
+    
+    # Handle binary vector input
     if x0_arr.ndim == 1 and x0_arr.size == n:
         x_bin = (x0_arr > 0.5).astype(int)
         sel_idx = np.flatnonzero(x_bin)
     else:
+        # Handle index list input
         sel_idx = np.unique(x0_arr.astype(int))
         if np.any(sel_idx < 0) or np.any(sel_idx >= n):
-            raise ValueError(f"x0 indices out of bounds, allowed range [0, {n-1}], received {sel_idx}")
+            raise ValueError(
+                f"x0 indices out of bounds. Allowed range: [0, {n-1}], received: {sel_idx}"
+            )
 
+    # Enforce cardinality constraint
     if cardinality is not None and len(sel_idx) > cardinality:
         sel_idx = sel_idx[:cardinality]
+    
+    # Ensure at least one product is selected
     if len(sel_idx) == 0:
         sel_idx = np.array([0], dtype=int)
 
+    # Create binary vector
     x_bin = np.zeros(n, dtype=int)
     x_bin[sel_idx] = 1
+    
     return x_bin
 
-# def mmnl_revenue(assort: np.ndarray,
-#                  uti: np.ndarray,
-#                  prices: np.ndarray,
-#                  v0: np.ndarray,
-#                  omega: np.ndarray) -> float:
-#     """
-#     Calculate expected revenue of a binary assortment vector.
-    
-#     Args:
-#         assort (np.ndarray): Binary assortment vector.
-#         uti (np.ndarray): Utility matrix (m, n).
-#         prices (np.ndarray): Price vector.
-#         v0 (np.ndarray): Outside option utilities.
-#         omega (np.ndarray): Segment weights.
-    
-#     Returns:
-#         float: Expected revenue.
-#     """
-#     assort = assort.astype(bool)
-#     if not assort.any():
-#         return 0.0
-#     if prices.ndim > 1:
-#         selected_prices = prices[0, assort]
-#     else:
-#         selected_prices = prices[assort]
-#     util_sel = uti[:, assort]
-#     total_util = v0 + util_sel.sum(axis=1)
-#     choice_prob = util_sel / total_util[:, None]
-#     revenue = (omega[:, None] * choice_prob * selected_prices).sum()
-#     return float(revenue)
 
-# def greedy_initial(prices: np.ndarray,
-#                    uti: np.ndarray,
-#                    omega: np.ndarray,
-#                    k: int) -> np.ndarray:
-#     """A simple one‑shot heuristic: pick κ products with highest
-#     aggregate *expected* revenue ignoring the denominator.
-#     Provides a good starting incumbent for the solver.
-#     """
-#     # Score_j = Σ_i γ_i ν_{ij} ρ_j
-#     score = (omega[:, None] * uti * prices).sum(axis=0)
-#     idx = np.argsort(score)[::-1][:k]
-#     x0 = np.zeros_like(prices, dtype=int)
-#     x0[idx] = 1
-#     return x0
-
-# def conic_mmnl(coef: np.ndarray,
-#                uti: np.ndarray,
-#                v_i0: np.ndarray,
-#                prices: np.ndarray,
-#                cardinality: int,
-#                num_of_products: int, 
-#                num_of_segments: int,
-#                A: np.ndarray | None = None,
-#                b: np.ndarray | None = None,
-#                time_limit: int = 600,
-#                threads: int = 0,
-#                use_greedy_start: bool = True):
-#     """
-#     Solve constrained assortment optimization under MMNL using conic formulation.
-
-#     Args:
-#         coef (np.ndarray): Segment coefficients.
-#         uti (np.ndarray): Utility matrix (m, n).
-#         v_i0 (np.ndarray): Outside option utilities.
-#         prices (np.ndarray): Price vector.
-#         cardinality (int): Maximum products to select.
-#         num_of_products (int): Number of products.
-#         num_of_segments (int): Number of segments.
-#         A (np.ndarray, optional): Constraint matrix.
-#         b (np.ndarray, optional): Constraint bounds.
-#         time_limit (int): Time limit in seconds.
-#         threads (int): Number of threads.
-#         use_greedy_start (bool): Whether to use greedy initial solution.
-
-#     Returns:
-#         tuple: (opt_revenue, assortment, info)
-#             opt_revenue (float): Optimal objective value.
-#             assortment (np.ndarray): 0/1 optimal assortment or None.
-#             info (dict): Solution statistics.
-#     """
-#     start = time.time()
-    
-#     prices = np.asarray(prices).flatten()
-#     m_seg, n_prod = num_of_segments, num_of_products
-#     prices = np.asarray(prices, dtype=float)
-
-#     # Ensure input shapes are correct
-#     coef = np.asarray(coef, dtype=float).reshape(-1)
-#     v_i0 = np.asarray(v_i0, dtype=float).reshape(-1)
-#     if coef.size != num_of_segments:
-#         coef = np.resize(coef, num_of_segments)
-#     if v_i0.size != num_of_segments:
-#         v_i0 = np.resize(v_i0, num_of_segments)
-    
-#     # Compute bounds
-#     y_u = 1.0 / v_i0
-#     y_l = np.empty_like(v_i0)
-#     for i in range(m_seg):
-#         top_k = np.partition(uti[i], -cardinality)[-cardinality:]
-#         y_l[i] = 1.0 / (v_i0[i] + top_k.sum())
-
-#     rho_bar = prices.max()
-
-#     # Build model
-#     model = gp.Model("MMNL_CONIC_MC")
-#     model.setParam("OutputFlag", 0)
-#     model.Params.OutputFlag = 0
-#     model.Params.TimeLimit = time_limit
-#     if threads:
-#         model.Params.Threads = threads
-#     model.Params.Presolve = 2
-#     model.Params.Cuts = 2
-#     model.Params.MIPFocus = 1
-
-#     # Variables
-#     x = model.addVars(n_prod, vtype=GRB.BINARY, name="x")
-#     y = model.addVars(m_seg, lb=y_l.tolist(), ub=y_u.tolist(), name="y")
-#     z = model.addVars([(i, j) for i in range(m_seg) for j in range(n_prod)],
-#                       lb=0.0, name="z")
-#     w = model.addVars(m_seg, lb=0.0, name="w")
-
-#     # Objective (Eq. 33)
-#     term1 = gp.quicksum(coef[i] * v_i0[i] * rho_bar * y[i]
-#                         for i in range(m_seg))
-#     term2 = gp.quicksum(coef[i] * uti[i, j] * (rho_bar - prices[j]) * z[i, j]
-#                         for i in range(m_seg) for j in range(n_prod))
-#     model.setObjective(term1 + term2, GRB.MINIMIZE)
-
-#     # Basic constraints
-#     model.addConstr(gp.quicksum(x[j] for j in range(n_prod)) <= cardinality,
-#                     name="capacity")
-#     model.addConstr(gp.quicksum(x[j] for j in range(n_prod)) >= 1,
-#                     name="non_empty")
-
-#     # MMNL structural equations
-#     for i in range(m_seg):
-#         model.addConstr(w[i] == v_i0[i] + gp.quicksum(uti[i, j] * x[j]
-#                                                      for j in range(n_prod)),
-#                         name=f"def_w[{i}]")
-
-#     for i in range(m_seg):
-#         for j in range(n_prod):
-#             model.addQConstr(z[i, j] * w[i] >= x[j], name=f"soc1[{i},{j}]")
-
-#     for i in range(m_seg):
-#         model.addQConstr(y[i] * w[i] >= 1, name=f"soc2[{i}]")
-
-#     for i in range(m_seg):
-#         lhs = v_i0[i] * y[i] + gp.quicksum(uti[i, j] * z[i, j]
-#                                           for j in range(n_prod))
-#         model.addConstr(lhs >= 1, name=f"soc3[{i}]")
-
-#     # McCormick strengthening
-#     for i in range(m_seg):
-#         for j in range(n_prod):
-#             model.addConstr(z[i, j] <= y_u[i] * x[j],
-#                             name=f"mc_up[{i},{j}]")
-#             model.addConstr(z[i, j] >= y_l[i] * x[j],
-#                             name=f"mc_low[{i},{j}]")
-#             model.addConstr(z[i, j] <= y[i] - y_l[i] * (1 - x[j]),
-#                             name=f"mc_box_up[{i},{j}]")
-#             model.addConstr(z[i, j] >= y[i] - y_u[i] * (1 - x[j]),
-#                             name=f"mc_box_low[{i},{j}]")
-
-#     # Extra linear constraints
-#     if A is not None and b is not None:
-#         A = np.asarray(A)
-#         b = np.asarray(b)
-#         if A.shape[1] != n_prod:
-#             raise ValueError("A must have shape (*, n_products)")
-#         if A.shape[0] != b.shape[0]:
-#             raise ValueError("A and b row mismatch")
-#         for r in range(A.shape[0]):
-#             model.addConstr(gp.quicksum(A[r, j] * x[j] for j in range(n_prod))
-#                             <= float(b[r]), name=f"extra[{r}]")
-
-
-#     # Optimization
-#     model.optimize()
-
-#     # Output
-#     t = time.time() - start
-#     best_bound = model.ObjBound
-#     status = model.Status 
-#     nodes = model.NodeCount
-#     print(f"[INFO] Gurobi optimization finished with status {status}, nodes: {nodes}, time: {t:.2f} seconds.")
-
-#     if model.Status == GRB.OPTIMAL:
-#         z_opt = model.ObjVal
-
-#         root_gap = None
-#         z_root = None
-#         end_gap = abs(z_opt - best_bound) / abs(z_opt) * 100
-
-#         info = {
-#             "status" : status,
-#             "nodes"  :  nodes,
-#             "egap"   : end_gap,
-#             "rgap"   : root_gap,
-#             "time"   : t,
-#             "z_opt" : z_opt,
-#             "z_root": z_root if root_gap is not None else None,
-#             "z_bb": best_bound
-#         }
-
-#         x_sol = np.array([x[j].X for j in range(n_prod)], dtype=int)
-#         opt_rev = mmnl_revenue(x_sol, uti, prices, v_i0, coef)
-#         return float(opt_rev), x_sol, info
-    
-#     else:
-#         print(f"[Warning] Gurobi optimization failed with status {model.Status}.")
-#         end_gap, root_gap = None, None    
-#         z_opt = None
-
-#         info = {
-#             "status" : status,
-#             "nodes"  :  nodes,
-#             "IterCount": model.IterCount,
-#             "egap"   : end_gap,
-#             "rgap"   : root_gap,
-#             "time"   : t,
-#             "z_opt" : z_opt,
-#             "z_root": z_root if root_gap is not None else None,
-#             "z_bb": best_bound
-#         }
-        
-#         print(f"[Warning] Gurobi optimization failed with status {status}")
-#         return best_bound, None, info  # or -1.0, None means infeasible

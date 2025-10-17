@@ -1,6 +1,4 @@
 import numpy as np
-import torch
-
 
 def generate_constraints(args):
     """

@@ -125,10 +125,9 @@ def mmnl_data_v0_lognorm(num_prod, m, r_type, seed=None):
     V = omega_ec @ epsilon  # shape = (m, N)
     utility_full = np.exp(V)
     u = utility_full[:, :-1]
-    # v0 = utility_full[:, -1]
-    # p = np.linspace(int(0.5*num_prod), 0, num_prod, endpoint=False).reshape(1, -1)  # linear
+
     price = build_revenue_curve(num_prod, r_type) 
-    # p = rng.uniform(1, 3, size=(1, num_prod))
+
     omega = rng.random(m)
     omega = omega / np.sum(omega)
 
