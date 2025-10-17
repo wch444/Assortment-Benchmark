@@ -115,7 +115,7 @@ from heuristic.mmnl_heuristic import *
 ```
 | Function| Description |
 | ------------- | ---------------------------------------------- |
-| `Conic_mmnl_warm_start` | An exact method to find the globally optimal assortment by formulating the problem as the conic integer formulation. [Şen et al.(2018)](#Şen2018)|
+| `conic_mmnl_warm_start` | An exact method to find the globally optimal assortment by formulating the problem as the conic integer formulation. [Şen et al.(2018)](#Şen2018)|
 | `revenue_order` | A simple heuristic that sorts products by price and selects all products with revenue greater than a threshold. [Talluri et al.(2004)](#Talluri2004)|
 
 The following method is used to solve the NL model, you can import all heuristics as:
@@ -125,7 +125,7 @@ from heuristic.nl_heuristic import *
 ```
 | Function| Description |
 | ------------- | ---------------------------------------------- |
-| `revenue_order_nl` | A algorithm based on linear programming, where each nest $i$ contains the $k_i$ highest-revenue products.[Davis et al.(2014)](#Davis2014)| 
+| `revenue_order_nl` | A algorithm based on linear programming, where each nest $i$ contains the $k_i$ highest-revenue products. [Davis et al.(2014)](#Davis2014)| 
 
 ---
 
