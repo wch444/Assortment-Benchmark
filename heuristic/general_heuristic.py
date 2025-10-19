@@ -4,7 +4,7 @@ from functools import partial
 from models.mmnl_functions import expected_revenue_mmnl_cpu
 
 
-def revenue_order(num_prod, choice_model, data, A=None, B=None, revenue_fn_order=None):
+def revenue_order(choice_model, data, A=None, B=None, revenue_fn_order=None):
     """
     Finds the best revenue-ordered assortment under optional linear constraints.
 
@@ -27,7 +27,7 @@ def revenue_order(num_prod, choice_model, data, A=None, B=None, revenue_fn_order
     best_rev = 0.0
     k = 0
     best_ass = None
-
+    num_prod = data.u.shape[1]
     for i in range(num_prod):
         current_ass = np.zeros((1, num_prod))
         current_ass[:, :i+1] = 1
