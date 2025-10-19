@@ -1,6 +1,6 @@
-# Assortment Optimization for MMNL and NL Choice Models
+# Hard Instance for Assortment Optimization under MMNL and NL Choice Models
 
-This repository provides a Python framework for solving assortment optimization problems under two popular discrete choice models: the **Mixed Multinomial Logit (MMNL)** and **Nested Logit (NL)** choice models.  
+This repository provides a framework for testing the hard assortment optimization problem under two popular discrete choice models: the **Mixed Multinomial Logit (MMNL)** and **Nested Logit (NL)** choice models.  
 
 The goal of assortment optimization is to select the subset of products to offer to customers to maximize expected revenue. This project provides tools to generate synthetic data, compute revenue, and find optimal assortments using both heuristic and exact optimization algorithms. The code is designed for **reproducibility, extensibility, and comparability**.
 
@@ -15,6 +15,7 @@ root/
 │    ├── constraint.py          # Capacity and structural constraints
 │    ├── mmnl_data_generator.py # Data generator for MMNL instances
 │    ├── nl_data_generator.py   # Data generator for NL instances
+│    ├── utils.py               # Load the data from the json file
 │
 │── heuristic/                  # Heuristic baselines
 │    ├── general_heuristic.py   # General heuristic solvers
