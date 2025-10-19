@@ -10,7 +10,6 @@ class MMNLInstanceData:
     n: int  # Number of products
     seed: int  # Random seed
     max_rev: float  # Maximum revenue
-    gap: float  # Gap value
     cap_rate: float
     u: np.ndarray  # Utility matrix
     price: np.ndarray  # Price vector
@@ -18,7 +17,7 @@ class MMNLInstanceData:
     omega: np.ndarray  # Customer type probability
     
     def __repr__(self):
-        return f"MMNLInstanceData(m={self.m}, n={self.n}, seed={self.seed}, cap_rate={self.cap_rate:.1f}, max_rev={self.max_rev:.4f}, gap={self.gap:.4f})"
+        return f"MMNLInstanceData(m={self.m}, n={self.n}, seed={self.seed}, cap_rate={self.cap_rate:.1f}, max_rev={self.max_rev:.4f})"
 
 
 def parse_config_to_instances_MNL(config: Dict[str, Any]) -> List[MMNLInstanceData]:
@@ -39,7 +38,6 @@ def parse_config_to_instances_MNL(config: Dict[str, Any]) -> List[MMNLInstanceDa
 
         seeds = m_data['seeds']
         max_revs = m_data['max_rev']
-        gaps = m_data['gap']
         cap_rate = m_data.get('cap_rate', 1.0)
         data_list = m_data['data']
 
@@ -53,7 +51,6 @@ def parse_config_to_instances_MNL(config: Dict[str, Any]) -> List[MMNLInstanceDa
                 seed=seed,
                 cap_rate=cap_rate,
                 max_rev=max_revs[i],
-                gap=gaps[i],
                 u=np.array(data_dict['u']),
                 price=np.array(data_dict['price']),
                 v0=np.array(data_dict['v0']),
@@ -87,7 +84,6 @@ class NLInstanceData:
     n: int  # Number of products per nest
     seed: int  # Random seed
     max_rev: float  # Maximum revenue
-    gap: float  # Gap value
     cap_rate: float  # Capacity rate
     v: np.ndarray  # Utility matrix (m x n)
     price: np.ndarray  # Price matrix (m x n)
@@ -96,7 +92,7 @@ class NLInstanceData:
     vi0: np.ndarray  # Within-nest no-purchase utility (m,) or scalar
     
     def __repr__(self):
-        return f"NLInstanceData(m={self.m}, n={self.n}, seed={self.seed}, cap_rate={self.cap_rate:.1f}, max_rev={self.max_rev:.4f}, gap={self.gap:.4f})"
+        return f"NLInstanceData(m={self.m}, n={self.n}, seed={self.seed}, cap_rate={self.cap_rate:.1f}, max_rev={self.max_rev:.4f})"
 
 
 def parse_config_to_instances_NL(config: Dict[str, Any]) -> List[NLInstanceData]:
@@ -116,10 +112,8 @@ def parse_config_to_instances_NL(config: Dict[str, Any]) -> List[NLInstanceData]
         parts = key.split('_')
         m = int(parts[1])  # Number of nests
         n = int(parts[0])  # Number of products per nest
-        
         seeds = data_group['seeds']
         max_revs = data_group['max_rev']
-        gaps = data_group['gap']
         cap_rate = data_group.get('cap_rate', 1.0)
         data_list = data_group['data']
         
@@ -140,7 +134,6 @@ def parse_config_to_instances_NL(config: Dict[str, Any]) -> List[NLInstanceData]
                 seed=seed,
                 cap_rate=cap_rate,
                 max_rev=max_revs[i],
-                gap=gaps[i],
                 v=np.array(data_dict['v']),
                 price=np.array(data_dict['price']),
                 gamma=np.array(data_dict['gamma']),
