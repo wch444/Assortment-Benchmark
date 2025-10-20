@@ -18,13 +18,13 @@ from typing import Union, Tuple
 #         v0 (float): Overall no-purchase utility
 #         vi0 (np.ndarray): Within-nest no-purchase utilities of shape (m,)
 #         gamma (np.ndarray): Dissimilarity parameters of shape (m,)
-#         constraint (tuple, optional): Constraint (A, B) where A @ x.flatten() <= B
+#         constraint (optional): Constraint (A, B) where A @ x.flatten() <= B
     
 #     Returns:
-#         np.ndarray: Binary assortment matrix of shape (m, n)
+#         np.ndarray: Binary assortment matrix of shape (1, m*n)
 #     """
 #     # Your implementation here
-#     assortment = ...  # Shape: (m, n)
+#     assortment = ...  # Shape: (1, m*n)
 #     return assortment
 
 

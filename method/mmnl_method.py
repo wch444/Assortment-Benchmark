@@ -15,7 +15,7 @@ from typing import Optional, Tuple, Dict, Union
 #         price (np.ndarray): Product prices of shape (n,)
 #         v0 (np.ndarray): No-purchase utilities of shape (m,)
 #         omega (np.ndarray): Segment weights of shape (m,), sum(omega) = 1
-#         constraint (tuple, optional): Linear constraint (A, B) where A @ x <= B
+#         constraint (optional): Linear constraint (A, B) where A @ x <= B
     
 #     Returns:
 #         np.ndarray: Binary assortment vector of shape (n,)

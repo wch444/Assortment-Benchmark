@@ -58,10 +58,10 @@ git clone https://github.com/wch444/Assortment-Benchmark.git
 ```
 
 For install dependencies, the project requires the following:
-- Python (>=3.11.13)
-- NumPy (>=2.3.2)
-- Pandas (>=12.0.3)
-- Gurobi (>=12.0.3)
+- Python (=3.11.13)
+- NumPy (=2.3.2)
+- Pandas (=12.0.3)
+- Gurobi (=12.0.3)
 
 You can use the requirements.txt files with pip to install a fully predetermined and working environment.
 ```bash
@@ -71,35 +71,40 @@ pip install -r requirements.txt
 
 ---
 
-## Hard Data Files
+## 📝 Hard Data Files
+This `hard_data/` folder provides **pre-generated challenging instances** for benchmarking assortment optimization algorithms under both **Mixed Multinomial Logit (MMNL)** and **Nested Logit (NL)** choice models.
 
-The `hard_data/` folder contains pre-generated challenging instances for benchmarking assortment optimization algorithms. All instances are stored in JSON format and can be loaded using the utilities in `generator/utils.py`.
+All instances is stored in JSON format and can be loaded directly using utility functions in `generator/utils.py`.
 
-### The Generation of the Instances
-- For MMNL model, the data is generated from the function `generator/mmnl_data_v0_lognorm.py`
-- For NL model, the data is generated from the function `generator/'nl_data_vi0_uniform01.py` and `generator/'nl_data_vi0_uniform01.py`
+### 1. Instance Generation
+- For MMNL model, the data is generated from the function `mmnl_data_v0_lognorm`
+- For NL model, the data is generated from the function `nl_data_vi0_uniform01` and `'nl_data_vi0_uniform01`
 
-### The Selection of the Instances
+---
 
-To ensure that the provided instances are genuinely challenging and representative of difficult cases, we followed a systematic selection process:
+### 2. Instance Selection
 
-1. **Initial Generation**: For each parameter combination (e.g., specific values of m, n, and cap_rate), we generated 100 candidate instances by controlling the random seed (seeds 0-99).
+To ensure that the provided instances are genuinely **challenging and representative of difficult cases **, we followed a systematic selection process:
 
-2. **Multi-Method Evaluation**: We evaluated each candidate instance using multiple state-of-the-art algorithms, including:
-   - Revenue-ordered heuristic [[Talluri et al. (2004)](#Talluri2004)]
+(1). **Initial Generation**: For each parameter combination (e.g., specific values of m, n, and cap_rate), we generated 100 candidate instances by controlling the random seed (seeds 1-100).
+
+(2). **Multi-Method Evaluation**: Each candidate was evaluated using multiple state-of-the-art algorithms, including:
+   - Revenue-ordered heuristic [[Talluri et al. (2004)](#Talluri2004)、[Davis et al. (2014)](#Davis2014)]
    - ADXOpt algorithm [[Gallego et al. (2024b)](#Gallego2024b)]
    - AlphaPhi heuristic [[Gallego et al. (2024a)](#Gallego2024a)]
+   - LP-based policy: [[Kunnumkal (2023)](#Kunnumkal2023)]
    - Our proposed neural network-based policy
 
-3. **Hard Instance Identification**: For each algorithm, we identified the 5 instances where it exhibited the largest optimality gap (i.e., the instances on which it performed worst).
+(3). **Hard Instance Identification**: For each algorithm, we identified the **five instances with  the largest optimality gap** (greater than $10^{-4}$), representing the most challenging instances where the algorithms performed worst.
 
-4. **Union of Challenging Cases**: We took the union of all identified hard instances across all tested methods. This ensures that the final dataset includes instances that are challenging for at least one (and often multiple) algorithms.
+(4). **Union of Challenging Cases**: The union of all identified hard instances across all tested methods, ensuring that each instance is difficult for at least one (and often multiple)  method.
 
-5. **Final Dataset Composition**: The resulting hard instances in the `hard_data/` folder represent cases where existing methods struggle, making them ideal benchmarks for evaluating new algorithms.
+(5). **Final Dataset Composition**: The resulting hard instances in the `hard_data/` folder represent cases where existing methods struggle, making them ideal benchmarks for evaluating new algorithms.
 
 
 **Optimal Solution Calculation**:
-- **MMNL instances**: The optimal revenue is computed by solving the mixed-integer conic program formulation proposed by [Şen et al. (2018)](#Şen2018) using Gurobi. In cases where Gurobi fails to find the exact optimal solution within a reasonable time limit, we use the best assortment found across all compared methods as the benchmark.
+- **MMNL instances**: The optimal revenue is computed by solving the mixed-integer conic program formulation proposed by [Şen et al. (2018)](#Şen2018) using Gurobi. When Gurobi fails to find the exact optimal solution within a reasonable time limit, we use the best assortment found across all compared methods as the benchmark.
+- 
 - **NL instances**: Due to the computational complexity of finding exact optimal solutions for large-scale NL problems, all methods are evaluated against the theoretical upper bound developed by [Kunnumkal (2023)](#Kunnumkal2023). This upper bound provides a performance guarantee for assessing solution quality.
 
 
@@ -112,11 +117,14 @@ To ensure that the provided instances are genuinely challenging and representati
 - Compare performance across multiple challenging scenarios
 - Identify algorithmic weaknesses and opportunities for improvement
 
+---
 
-### MMNL (Mixed Multinomial Logit) Instances
+### 3. File Overview
+#### MMNL (Mixed Multinomial Logit)
 
 **File naming convention**: `mmnl_{constraint}_{revenue_curve}_data.json`
 
+**Key configurations**
 - **Constraint types**:
   - `unconstrained`: No capacity constraints
   - `card`: Cardinality constraint (limited number of products)
@@ -129,15 +137,18 @@ To ensure that the provided instances are genuinely challenging and representati
   - Number of products (n): {50, 100, 200}
   - Number of customer segments (m): {5, 10, 25}
   - Cardinality rates (for constrained): {0.1, 0.3, 0.5} × n
-  - Each (m, n, cap_rate) combination contains multiple instances with different random seeds
+  - Each (m, n, cap_rate`(if applicable)`) combination contains multiple instances with different random seeds
 
-### NL (Nested Logit) Instances
+---
+
+### 4. NL (Nested Logit) 
 
 **File naming convention**: `nl_{constraint}_{vi0_method}_data.json`
 
+**Key configurations**
 - **Constraint types**:
   - `unconstrained`: No capacity constraints
-  - `card`: Cardinality constraint (limited number of products)
+  - `card`: Cardinality constraint (limited number of products in each nest)
 
 - **vi0 distribution methods**:
   - `01`: vi0 ~ Uniform(0, 1) - Low outside-nest utility
@@ -146,10 +157,12 @@ To ensure that the provided instances are genuinely challenging and representati
 - **Instance parameters**:
   - Number of nests (m): {5, 10, 20}
   - Number of products per nest (n): {25, 50}
-  - Cardinality rates (for constrained): {0.1, 0.3, 0.5} × (m × n)
-  - Each (m, n, cap_rate) combination contains multiple instances with different random seeds
+  - Cardinality rates (for constrained in each nest): {0.1, 0.3, 0.5} × n
+  - Each (m, n, cap_rate`(if applicable)`) combination contains multiple instances with different random seeds
 
-### Loading Instances
+---
+
+### 5. Loading Instances
 
 ```python
 from generator.utils import load_MNL_instances, load_NL_instances
@@ -161,32 +174,31 @@ mmnl_instances = load_MNL_instances("hard_data/mmnl_card_RS2_data.json")
 nl_instances = load_NL_instances("hard_data/nl_unconstrained_01_data.json")
 ```
 
-### Instance Data Structure
+---
+
+### 6. Instance Data Structure
 
 Each instance contains:
 - **Problem parameters**: m, n, cap_rate (if applicable)
-- **Utility/preference data**: u (MMNL) or v (NL), v0, vi0 (NL), gamma (NL)
-- **Price data**: price vector
-- **Segment weights**: omega (MMNL)
-- **Optimal solution**: max_rev (optimal revenue), optimal_assortment
 - **Random seed**: For reproducibility
+- **Optimal revenue**: Corresponding optimal revenue (max_rev)
+- **Related data**: u, price, v0, omega (for MMNL); price, v, gamma, v0, vi0 (for NL)
 
 
-## 🚀 How to Use?
+## 🚀 User Guide
 
 The easiest way to get started is to run the example Jupyter notebooks located in the `src/` directory. Each notebook demonstrates how to load hard instances, implement your own algorithm, and evaluate its performance.
 
 ### 1. Mixed Multinomial Logit (MMNL) Model
 
 #### Unconstrained Problem
-[`src/mmnl_unconstrained_example.ipynb`](src/mmnl_unconstrained_example.ipynb)
-
+**Notebook**: [`src/mmnl_unconstrained_example.ipynb`](src/mmnl_unconstrained_example.ipynb)
 This notebook demonstrates:
 - Loading pre-generated hard instances from `hard_data/`
 - Understanding the instance structure and data distribution
 - Implementing your own optimization algorithm
 - Evaluating performance against optimal solutions
-- Comparing results across different revenue curves (RS2 vs RS4)
+- Saving results across different revenue curves (RS2 vs RS4)
 - Analyzing optimality gaps across problem sizes (m, n combinations)
 
 **Instance Parameters**:
@@ -195,7 +207,7 @@ This notebook demonstrates:
 - Revenue curves: RS2 and RS4
 
 #### Cardinality-Constrained Problem
-[`src/mmnl_cardinality_example.ipynb`](src/mmnl_cardinality_example.ipynb)
+**Notebook**:[`src/mmnl_cardinality_example.ipynb`](src/mmnl_cardinality_example.ipynb)
 
 This notebook covers:
 - Loading cardinality-constrained instances

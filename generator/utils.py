@@ -20,7 +20,7 @@ class MMNLInstanceData:
         return f"MMNLInstanceData(m={self.m}, n={self.n}, seed={self.seed}, cap_rate={self.cap_rate:.1f}, max_rev={self.max_rev:.4f})"
 
 
-def parse_config_to_instances_MNL(config: Dict[str, Any]) -> List[MMNLInstanceData]:
+def parse_config_to_instances_MMNL(config: Dict[str, Any]) -> List[MMNLInstanceData]:
     """
     Parse config dictionary into a list of MMNLInstanceData instances
     
@@ -61,7 +61,7 @@ def parse_config_to_instances_MNL(config: Dict[str, Any]) -> List[MMNLInstanceDa
 
     return instances
 
-def load_MNL_instances(input_json_path):
+def load_MMNL_instances(input_json_path):
     """
     Load MMNL instances from a JSON file.
     
@@ -72,7 +72,7 @@ def load_MNL_instances(input_json_path):
     with open(input_json_path, 'r', encoding='utf-8') as f:
         config = json.load(f)
 
-    instances = parse_config_to_instances_MNL(config)
+    instances = parse_config_to_instances_MMNL(config)
 
     return instances
 
