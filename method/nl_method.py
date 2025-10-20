@@ -4,6 +4,30 @@ from gurobipy import GRB
 from typing import Union, Tuple
 
 
+
+
+# def your_nl_algorithm(m, n, v, price, v0, vi0, gamma, constraint=None):
+#     """
+#     Your custom algorithm for NL assortment optimization
+    
+#     Args:
+#         m (int): Number of nests
+#         n (int): Number of products per nest
+#         v (np.ndarray): Utility matrix of shape (m, n)
+#         price (np.ndarray): Price matrix of shape (m, n)
+#         v0 (float): Overall no-purchase utility
+#         vi0 (np.ndarray): Within-nest no-purchase utilities of shape (m,)
+#         gamma (np.ndarray): Dissimilarity parameters of shape (m,)
+#         constraint (tuple, optional): Constraint (A, B) where A @ x.flatten() <= B
+    
+#     Returns:
+#         np.ndarray: Binary assortment matrix of shape (m, n)
+#     """
+#     # Your implementation here
+#     assortment = ...  # Shape: (m, n)
+#     return assortment
+
+
 def revenue_order_nl(
     m: int,
     n: int,

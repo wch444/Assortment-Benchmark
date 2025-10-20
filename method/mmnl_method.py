@@ -4,6 +4,29 @@ import time
 from typing import Optional, Tuple, Dict, Union
 
 
+# def your_mmnl_algorithm(m, n, u, price, v0, omega, constraint=None):
+#     """
+#     Your custom algorithm for MMNL assortment optimization
+    
+#     Args:
+#         m (int): Number of customer segments
+#         n (int): Number of products
+#         u (np.ndarray): Utility matrix of shape (m, n)
+#         price (np.ndarray): Product prices of shape (n,)
+#         v0 (np.ndarray): No-purchase utilities of shape (m,)
+#         omega (np.ndarray): Segment weights of shape (m,), sum(omega) = 1
+#         constraint (tuple, optional): Linear constraint (A, B) where A @ x <= B
+    
+#     Returns:
+#         np.ndarray: Binary assortment vector of shape (n,)
+#     """
+#     # Your implementation here
+#     assortment = ...  # Shape: (n,)
+#     return assortment
+
+
+
+
 def conic_mmnl_warm_start(
     coef: np.ndarray,
     uti: np.ndarray,
