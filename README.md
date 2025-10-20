@@ -71,7 +71,7 @@ pip install -r requirements.txt
 
 ---
 
-## 📝 Hard Instance Files
+## 📝 Hard Instance Data
 This `hard_data/` folder provides **pre-generated challenging instances** for benchmarking assortment optimization algorithms under both **Mixed Multinomial Logit (MMNL)** and **Nested Logit (NL)** choice models.
 
 All instances is stored in JSON format and can be loaded directly using utility functions in `generator/utils.py`.
@@ -86,27 +86,26 @@ All instances is stored in JSON format and can be loaded directly using utility 
 
 ### 2. Instance Selection
 
-To ensure that the provided instances are genuinely **challenging and representative of difficult cases **, we followed a systematic selection process:
+To ensure that the provided instances are genuinely **challenging and representative of difficult cases**, we followed a systematic selection process:
 
-(1). **Initial Generation**: For each parameter combination (e.g., specific values of m, n, and cap_rate), we generated 100 candidate instances by controlling the random seed (seeds 1-100).
+- **Initial Generation**: For each parameter combination (e.g., specific values of m, n, and cap_rate), we generated 100 candidate instances by controlling the random seed (seeds 1-100).
 
-(2). **Multi-Method Evaluation**: Each candidate was evaluated using multiple state-of-the-art algorithms, including:
+-  **Multi-Method Evaluation**: Each candidate was evaluated using multiple state-of-the-art algorithms, including:
    - Revenue-ordered heuristic [[Talluri et al. (2004)](#Talluri2004)、[Davis et al. (2014)](#Davis2014)]
    - ADXOpt algorithm [[Gallego et al. (2024b)](#Gallego2024b)]
    - AlphaPhi heuristic [[Gallego et al. (2024a)](#Gallego2024a)]
    - LP-based policy: [[Kunnumkal (2023)](#Kunnumkal2023)]
    - Our proposed neural network-based policy
 
-(3). **Hard Instance Identification**: For each algorithm, we identified the **five instances with  the largest optimality gap** (greater than $10^{-4}$), representing the most challenging instances where the algorithms performed worst.
+- **Hard Instance Identification**: For each algorithm, we identified the five instances with  the largest optimality gap (greater than $10^{-4}$), representing the most challenging instances where the algorithms performed worst.
 
-(4). **Union of Challenging Cases**: The union of all identified hard instances across all tested methods, ensuring that each instance is difficult for at least one (and often multiple)  method.
+- **Union of Challenging Cases**: The union of all identified hard instances across all tested methods, ensuring that each instance is difficult for at least one (and often multiple)  method.
 
-(5). **Final Dataset Composition**: The resulting hard instances in the `hard_data/` folder represent cases where existing methods struggle, making them ideal benchmarks for evaluating new algorithms.
+- **Final Dataset Composition**: The resulting hard instances in the `hard_data/` folder represent cases where existing methods struggle, making them ideal benchmarks for evaluating new algorithms.
 
 
 **Optimal Solution Calculation**:
 - **MMNL instances**: The optimal revenue is computed by solving the mixed-integer conic program formulation proposed by [Şen et al. (2018)](#Şen2018) using Gurobi. When Gurobi fails to find the exact optimal solution within a reasonable time limit, we use the best assortment found across all compared methods as the benchmark.
-- 
 - **NL instances**: Due to the computational complexity of finding exact optimal solutions for large-scale NL problems, all methods are evaluated against the theoretical upper bound developed by [Kunnumkal (2023)](#Kunnumkal2023). This upper bound provides a performance guarantee for assessing solution quality.
 
 
@@ -121,12 +120,14 @@ To ensure that the provided instances are genuinely **challenging and representa
 
 ---
 
-### 3. File Overview
+### 3. Data Overview
+This section details the structure and configuration of the generated MMNL and NL instances used in experiments.
+
+All datasets are stored in JSON format for easy parsing and reproducibility.
+
 #### MMNL (Mixed Multinomial Logit)
 
 **File naming convention**: `mmnl_{constraint}_{revenue_curve}_data.json`
-
-**Key configurations**
 - **Constraint types**:
   - `unconstrained`: No capacity constraints
   - `card`: Cardinality constraint (limited number of products)
@@ -135,19 +136,15 @@ To ensure that the provided instances are genuinely **challenging and representa
   - `RS2`: Revenue curve type 2
   - `RS4`: Revenue curve type 4
 
-- **Instance parameters**:
+**Instance parameters configuration**:
   - Number of products (n): {50, 100, 200}
   - Number of customer segments (m): {5, 10, 25}
-  - Cardinality rates (for constrained): {0.1, 0.3, 0.5} × n
+  - Cardinality rates of constraints (cap_rate): {0.1, 0.3, 0.5}
   - Each (m, n, cap_rate`(if applicable)`) combination contains multiple instances with different random seeds
 
----
-
-### 4. NL (Nested Logit) 
+#### NL (Nested Logit) 
 
 **File naming convention**: `nl_{constraint}_{vi0_method}_data.json`
-
-**Key configurations**
 - **Constraint types**:
   - `unconstrained`: No capacity constraints
   - `card`: Cardinality constraint (limited number of products in each nest)
@@ -156,15 +153,15 @@ To ensure that the provided instances are genuinely **challenging and representa
   - `01`: vi0 ~ Uniform(0, 1) - Low outside-nest utility
   - `34`: vi0 ~ Uniform(3, 4) - High outside-nest utility
 
-- **Instance parameters**:
+**Instance parameters configuration**:
   - Number of nests (m): {5, 10, 20}
   - Number of products per nest (n): {25, 50}
-  - Cardinality rates (for constrained in each nest): {0.1, 0.3, 0.5} × n
+  - Cardinality rates of constraints in each nest (cap_rate): {0.1, 0.3, 0.5} 
   - Each (m, n, cap_rate`(if applicable)`) combination contains multiple instances with different random seeds
 
 ---
 
-### 5. Loading Instances
+### 4. Loading Instances
 
 ```python
 from generator.utils import load_MNL_instances, load_NL_instances
@@ -178,7 +175,7 @@ nl_instances = load_NL_instances("hard_data/nl_unconstrained_01_data.json")
 
 ---
 
-### 6. Instance Data Structure
+### 5. Instance Data Structure
 
 Each instance contains:
 - **Problem parameters**: m, n, cap_rate (if applicable)
