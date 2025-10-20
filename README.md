@@ -107,7 +107,7 @@ To ensure that the provided instances are genuinely challenging and representati
 - Each parameter combination typically contains 3-10 hard instances
 - Instances are selected to maximize algorithmic difficulty rather than random sampling
 
-This selection methodology ensures that researchers can:
+**This selection methodology ensures that researchers can**:
 - Test their algorithms on genuinely difficult problem instances
 - Compare performance across multiple challenging scenarios
 - Identify algorithmic weaknesses and opportunities for improvement
@@ -144,8 +144,8 @@ This selection methodology ensures that researchers can:
   - `34`: vi0 ~ Uniform(3, 4) - High outside-nest utility
 
 - **Instance parameters**:
-  - Number of nests (m): {5, 10, 15}
-  - Number of products per nest (n): {25, 50, 75}
+  - Number of nests (m): {5, 10, 20}
+  - Number of products per nest (n): {25, 50}
   - Cardinality rates (for constrained): {0.1, 0.3, 0.5} × (m × n)
   - Each (m, n, cap_rate) combination contains multiple instances with different random seeds
 
@@ -222,8 +222,8 @@ This notebook demonstrates:
 - Analyzing how problem size affects algorithm performance
 
 **Instance Parameters**:
-- Number of nests (m): {5, 10, 15}
-- Number of products per nest (n): {25, 50, 75}
+- Number of nests (m): {5, 10, 20}
+- Number of products per nest (n): {25, 50}
 - vi0 distributions: Uniform(0,1) and Uniform(3,4)
 
 **Key Visualizations Included**:
@@ -244,7 +244,7 @@ This notebook covers:
 **Additional Constraints**:
 - Cardinality rates: {0.1, 0.3, 0.5} × (m × n)
 - Your algorithm must return a binary matrix of shape (m, n)
-- Constraint: `sum(assortment) <= cap_rate * m * n`
+- Constraint: `sum(assortment_i) <= cap_rate * n` for each nest `i`
 
 ---
 
@@ -301,93 +301,190 @@ Notebooks generate:
 
 ---
 
-## 🔱 What's in there ?
+## 📚 Module Documentation
 
-### 1. Data Generation
-Here summarizes the available data generation methods provided in  
-`generator/`. 
+This section provides detailed documentation for the main modules in this repository. These modules support data generation, constraint modeling, optimization algorithms, and performance evaluation.
 
-The following is the data generation method of the MMNL model, you can import all generators as:
-```bash
+---
+
+### 1. Data Generators (`generator/`)
+
+The `generator/` directory contains functions for creating synthetic problem instances. These generators are used to create both the hard instances in `hard_data/` and allow you to generate custom instances.
+
+#### MMNL Data Generators
+
+Import all MMNL generators:
+```python
 from generator.mmnl_data_generator import *
-```
-
-| Function| Description |
-| ------------- | ----------------------------------------------- |
-| `mmnl_data_v0_lognorm` | **Our constructed** data generator designed to capture continuous heterogeneity among customer segments. A few segments exhibit exceptionall high no-purchase utilities `v0`, following a log-normal distribution. And there are various product revenue curves.|
-| `mmnl_data_random`     | Randomly generates related data, where the no-purchase utility takes values 1 or 5 for half if the segments.  |
-| `mmnl_data_easy`       | Following the setting used in [Şen et al.(2018)](#Şen2018). Produces uniformly random utilities and prices, with equal segment weights and no-purchase utility. | 
-| `mmnl_data_hard`       | Following the setting used in [Şen et al.(2018)](#Şen2018). Generates a sparse utility matrix, where each customer type includes only k products with utility greater than 0 and the number of customer types equals the number of products.| 
-
-The following is the data generation method of the NL model, you can import all generators as:
-```bash
-from generator.nl_data_generator import *
-```
-
-| Function| Description |
-| ------------- | ---------------------------------------------- |
-| `nested_data_complex`   | Following the setting used in [Davis et al.(2014)](#Davis2014). Generates complex nested data with nonlinear interactions.|
-| `nested_data_random`    | Following the setting used in [Gallego et al.(2024)](#Gallego2024). Generates random prices and utilities within user-defined ranges.|
-| `nested_data_NewBounds` | Following the setting used in [Kunnumkal (2023)](#Kunnumkal2023). Creates complex nested structure data with smooth relationships between price and utility.|
-| `nl_data_vi0_uniform01` | **Our extension** of `nested_data_NewBounds` introducing low within-nest no-purchase utility `vi0 ∼ U(0, 1)`. |
-| `nl_data_vi0_uniform34` | **Our extension** of `nested_data_NewBounds` introducing high within-nest no-purchase utility `vi0 ∼ U(3, 4)`.  |
-| `nl_data_vi0_lognormal` | **Our extension** of `nested_data_NewBounds` introducing long-tail distribution no-purchase utility `vi0 ∼ LogNormal(μ=1, σ=0.5)` clipped to [1, 5]. |
-
-### 2. Constraint Generation
-Here summarizes commonly used constraint generators for assortment optimization. Each function returns a pair `(A, B)` representing linear constraints of the form $Ax \leq B$, where $x$ is the binary assortment vector.
-
-You can import them as:
-```bash
-from generator.constraints import *
 ```
 
 | Function | Description |
 | -------- | ----------- |
-| `cardinality`| Generates a cardinality constraint ensuring that at most `cap` products can be selected. |
-| `card_nested_logit` | Only applicable to NL models. It restricts the maximum number `cap` of products within each nest. | 
-| `cons_capacity` | Generates capacity constraints with different randomized structures. |
+| `mmnl_data_v0_lognorm` | **Used for hard instances**. Captures continuous heterogeneity among customer segments with log-normal no-purchase utilities `v0`. Supports multiple product revenue curves (RS2, RS4). |
+| `mmnl_data_random` | Randomly generates utilities and prices, with no-purchase utility taking values 1 or 5 for half of the segments. |
+| `mmnl_data_easy` | Following [Şen et al. (2018)](#Şen2018). Generates uniformly random utilities and prices with equal segment weights and no-purchase utility. |
+| `mmnl_data_hard` | Following [Şen et al. (2018)](#Şen2018). Creates sparse utility matrix where each customer type has only k products with positive utility. |
 
-### 3. Heuristic Optimization Method
-Here summarizes the optimization algorithms implemented in our framework.  
+#### NL Data Generators
 
-The following method is used to solve the MMNL model, you can import all heuristics as:
-```bash
-from heuristic.general_heuristic import *
-from heuristic.mmnl_heuristic import *
+Import all NL generators:
+```python
+from generator.nl_data_generator import *
 ```
-| Function| Description |
-| ------------- | ---------------------------------------------- |
-| `conic_mmnl_warm_start` | An exact method to find the globally optimal assortment by formulating the problem as the conic integer formulation. [Şen et al.(2018)](#Şen2018)|
-| `revenue_order` | A simple heuristic that sorts products by price and selects all products with revenue greater than a threshold. [Talluri et al.(2004)](#Talluri2004)|
 
-The following method is used to solve the NL model, you can import all heuristics as:
-```bash
-from heuristic.general_heuristic import *
-from heuristic.nl_heuristic import *
-```
-| Function| Description |
-| ------------- | ---------------------------------------------- |
-| `revenue_order_nl` | A algorithm based on linear programming, where each nest $i$ contains the $k_i$ highest-revenue products. [Davis et al.(2014)](#Davis2014)| 
+| Function | Description |
+| -------- | ----------- |
+| `nl_data_vi0_uniform01` | **Used for hard instances**. Extension of `nested_data_NewBounds` with low within-nest no-purchase utility `vi0 ~ U(0, 1)`. |
+| `nl_data_vi0_uniform34` | **Used for hard instances**. Extension of `nested_data_NewBounds` with high within-nest no-purchase utility `vi0 ~ U(3, 4)`. |
+| `nl_data_vi0_lognormal` | Extension of `nested_data_NewBounds` with long-tail distribution `vi0 ~ LogNormal(μ=1, σ=0.5)` clipped to [1, 5]. |
+| `nested_data_NewBounds` | Following [Kunnumkal (2023)](#Kunnumkal2023). Creates nested structure with smooth price-utility relationships. |
+| `nested_data_random` | Following [Gallego et al. (2024)](#Gallego2024). Generates random prices and utilities within user-defined ranges. |
+| `nested_data_complex` | Following [Davis et al. (2014)](#Davis2014). Generates complex nested data with nonlinear interactions. |
 
 ---
 
+### 2. Constraint Generators (`generator/constraint.py`)
+
+These functions generate various constraints for assortment optimization. Each returns `(A, B)` representing linear constraints $Ax \leq B$, where $x$ is the binary assortment vector.
+
+Import constraints:
+```python
+from generator.constraint import *
+```
+
+| Function | Description |
+| -------- | ----------- |
+| `cardinality` | Generates cardinality constraint: at most `cap` products can be selected. Returns constraint ensuring `sum(x) <= cap`. |
+| `card_nested_logit` | **NL-specific**. Restricts the maximum number of products within each nest. Returns `m` separate constraints, one per nest. |
+| `cons_capacity` | Generates capacity constraints with different randomized structures for more complex scenarios. |
+
+---
+
+### 3. Optimization Methods (`method/`)
+
+These modules implement various optimization algorithms for solving assortment problems.
+
+#### General Methods
+
+Import general methods:
+```python
+from method.general_method import *
+```
+
+| Function | Description |
+| -------- | ----------- |
+| `revenue_order` | Revenue-ordered heuristic [[Talluri et al. (2004)](#Talluri2004)]. Sorts products by revenue and selects high-revenue items. Works for both MMNL and NL models. |
+
+#### MMNL-Specific Methods
+
+Import MMNL methods:
+```python
+from method.mmnl_method import *
+```
+
+| Function | Description |
+| -------- | ----------- |
+| `conic_mmnl_warm_start` | Exact method using conic integer programming formulation [[Şen et al. (2018)](#Şen2018)]. Finds globally optimal assortment using Gurobi solver. |
+
+#### NL-Specific Methods
+
+Import NL methods:
+```python
+from method.nl_method import *
+```
+
+| Function | Description |
+| -------- | ----------- |
+| `revenue_order_nl` | LP-based algorithm [[Davis et al. (2014)](#Davis2014)] where each nest contains the $k_i$ highest-revenue products. |
+
+---
+
+### 4. Evaluation Functions (`models/`)
+
+These modules provide functions to evaluate assortment performance and calculate revenues.
+
+#### MMNL Evaluation Functions
+
+Import MMNL functions:
+```python
+from models.mmnl_functions import *
+```
+
+| Function | Description |
+| -------- | ----------- |
+| `get_revenue_function_mmnl` | Returns a revenue function for a given MMNL instance. The returned function takes an assortment and computes expected revenue. |
+
+#### NL Evaluation Functions
+
+Import NL functions:
+```python
+from models.nl_functions import *
+```
+
+| Function | Description |
+| -------- | ----------- |
+| `get_revenue_function_nl` | Returns a revenue function for a given NL instance. The returned function takes an assortment matrix and computes expected revenue. |
+
+---
+
+### 5. Utility Functions (`generator/utils.py`)
+
+Import utilities:
+```python
+from generator.utils import *
+```
+
+| Function | Description |
+| -------- | ----------- |
+| `load_MNL_instances` | Loads MMNL instances from JSON file. Returns list of instance objects with all problem parameters and optimal solutions. |
+| `load_NL_instances` | Loads NL instances from JSON file. Returns list of instance objects with nest structures and optimal solutions. |
 
 ---
 
 ## 🧩 Key Features
 
-- Supports **two choice models**: NL and MMNL
-- Provides **exact solver** and **heuristic baselines**
-- Provides **multiple data generation methods**
-- Ensures **reproducibility** via fixed random seeds
+- **Two choice models supported**: Mixed Multinomial Logit (MMNL) and Nested Logit (NL)
+- **Multiple data generators**: Create custom instances or use pre-generated hard instances
+- **Flexible constraints**: Cardinality, capacity, and nest-specific constraints
+- **Exact and heuristic solvers**: Gurobi-based exact methods and fast heuristics
+- **Comprehensive evaluation**: Built-in functions for computing revenues and optimality gaps
+- **Reproducibility**: All instances include random seeds for exact replication
 
 ---
 
-## 🛠️ Extending
+## 🛠️ Extending the Framework
 
-- Add new data generation in `generator/`
-- Implement new heuristics in `heuristic/`
-- Extend to new choice models by creating functions in the corresponding files
+This codebase is designed to be easily extensible:
+
+- **Add new data generators**: Create new functions in `generator/mmnl_data_generator.py` or `generator/nl_data_generator.py`
+- **Implement new algorithms**: Add methods to `method/mmnl_method.py` or `method/nl_method.py`
+- **Define custom constraints**: Extend `generator/constraint.py` with new constraint types
+- **Support new choice models**: Create new modules following the structure of existing `models/` files
+
+### Example: Adding a New Heuristic
+
+```python
+# In method/mmnl_method.py
+def my_new_heuristic(m, n, u, price, v0, omega, constraint=None):
+    """
+    Your algorithm description here
+    
+    Args:
+        m: number of customer segments
+        n: number of products
+        u: utility matrix (m x n)
+        price: product prices (n,)
+        v0: no-purchase utilities (m,)
+        omega: segment weights (m,)
+        constraint: optional constraint tuple (A, B)
+    
+    Returns:
+        assortment: binary vector of length n
+    """
+    # Your implementation here
+    assortment = ...
+    return assortment
+```
 
 ---
 
@@ -407,6 +504,8 @@ If you use this repository, please cite it in your work.
 <a id="Rogosinski2024"></a> [1] Rogosinski S, Müller S, Reyes-Rubiano L. Distribution-specific approximation guarantees for the random-parameters logit assortment problem[J]. 2024.  
 <a id="Şen2018"></a> [2] Şen A, Atamtürk A, Kaminsky P. A conic integer optimization approach to the constrained assortment problem under the mixed multinomial logit model[J]. Operations Research, 2018, 66(4): 994-1003.  
 <a id="Kunnumkal2023"></a> [3] Kunnumkal S. New bounds for cardinality-constrained assortment optimization under the nested logit model[J]. Operations Research, 2023, 71(4): 1112-1119.  
-<a id="Gallego2024"></a> [4] Gallego G, Jagabathula S, Lu W. Efficient Local-Search Heuristics for Online and Offline Assortment Optimization[J]. Available at SSRN 4828069, 2024.  
-<a id="Davis2014"></a> [5] Davis J M, Gallego G, Topaloglu H. Assortment optimization under variants of the nested logit model[J]. Operations Research, 2014, 62(2): 250-273.  
-<a id="Talluri2004"></a> [6] Talluri K, Van Ryzin G. Revenue management under a general discrete choice model of consumer behavior[J]. Management Science, 2004, 50(1): 15-33.  
+<a id="Gallego2024a"></a> [4] Gallego G, Gao P, Wang S, Berbeglia G (2024a) Assortment optimization with downward feasibility: Efficient
+heuristics based on independent demands. Available at SSRN 5021867, 2024.
+<a id="Gallego2024b"></a> [5] Gallego G, Jagabathula S, Lu W. Efficient Local-Search Heuristics for Online and Offline Assortment Optimization[J]. Available at SSRN 4828069, 2024.  
+<a id="Davis2014"></a> [6] Davis J M, Gallego G, Topaloglu H. Assortment optimization under variants of the nested logit model[J]. Operations Research, 2014, 62(2): 250-273.  
+<a id="Talluri2004"></a> [7] Talluri K, Van Ryzin G. Revenue management under a general discrete choice model of consumer behavior[J]. Management Science, 2004, 50(1): 15-33.  
