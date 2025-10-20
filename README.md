@@ -71,10 +71,12 @@ pip install -r requirements.txt
 
 ---
 
-## 📝 Hard Data Files
+## 📝 Hard Instance Files
 This `hard_data/` folder provides **pre-generated challenging instances** for benchmarking assortment optimization algorithms under both **Mixed Multinomial Logit (MMNL)** and **Nested Logit (NL)** choice models.
 
 All instances is stored in JSON format and can be loaded directly using utility functions in `generator/utils.py`.
+
+---
 
 ### 1. Instance Generation
 - For MMNL model, the data is generated from the function `mmnl_data_v0_lognorm`
@@ -184,88 +186,36 @@ Each instance contains:
 - **Optimal revenue**: Corresponding optimal revenue (max_rev)
 - **Related data**: u, price, v0, omega (for MMNL); price, v, gamma, v0, vi0 (for NL)
 
+---
 
 ## 🚀 User Guide
 
 The easiest way to get started is to run the example Jupyter notebooks located in the `src/` directory. Each notebook demonstrates how to load hard instances, implement your own algorithm, and evaluate its performance.
 
-### 1. Mixed Multinomial Logit (MMNL) Model
+---
 
-#### Unconstrained Problem
-**Notebook**: [`src/mmnl_unconstrained_example.ipynb`](src/mmnl_unconstrained_example.ipynb)
-This notebook demonstrates:
-- Loading pre-generated hard instances from `hard_data/`
-- Understanding the instance structure and data distribution
-- Implementing your own optimization algorithm
-- Evaluating performance against optimal solutions
-- Saving results across different revenue curves (RS2 vs RS4)
-- Analyzing optimality gaps across problem sizes (m, n combinations)
+### 1. Example Notebooks for MMNL and NL Models
 
-**Instance Parameters**:
-- Number of products (n): {50, 100, 200}
-- Number of customer segments (m): {5, 10, 25}
-- Revenue curves: RS2 and RS4
+#### MMNL Model
 
-#### Cardinality-Constrained Problem
-**Notebook**:[`src/mmnl_cardinality_example.ipynb`](src/mmnl_cardinality_example.ipynb)
+**Unconstrained Problem**: [`src/mmnl_unconstrained_example.ipynb`](src/mmnl_unconstrained_example.ipynb)
 
-This notebook covers:
-- Loading cardinality-constrained instances
-- Visualizing instance distribution across different dimensions
-- Implementing algorithms that respect capacity constraints
+**Cardinality-Constrained Problem**:[`src/mmnl_cardinality_example.ipynb`](src/mmnl_cardinality_example.ipynb). Implement algorithms that respect cardinality constraints, your algorithm must satisfy: `sum(assortment) <= cap_rate * n`
 
-**Additional Constraints**:
-- Cardinality rates: {0.1, 0.3, 0.5} × n
-- Your algorithm must satisfy: `sum(assortment) <= cap_rate * n`
+#### NL Model
+
+**Unconstrained Problem**:[`src/nl_unconstrained_example.ipynb`](src/nl_unconstrained_example.ipynb)
+
+**Cardinality-Constrained Problem**:[`src/nl_cardinality_example.ipynb`](src/nl_cardinality_example.ipynb). Implement algorithms with nested cardinality constraints `sum(assortment_i) <= cap_rate * n` for each nest `i`
 
 ---
 
-### 2. Nested Logit (NL) Model
-
-#### Unconstrained Problem
-[`src/nl_unconstrained_example.ipynb`](src/nl_unconstrained_example.ipynb)
-
-This notebook demonstrates:
-- Loading and exploring NL instances with detailed visualizations
-- Understanding nest structures, utilities, and dissimilarity parameters
-- Implementing your algorithm for the NL choice model
-- Evaluating against theoretical upper bounds
-- Comparing performance across different vi0 distributions (uniform01 vs uniform34)
-- Analyzing how problem size affects algorithm performance
-
-**Instance Parameters**:
-- Number of nests (m): {5, 10, 20}
-- Number of products per nest (n): {25, 50}
-- vi0 distributions: Uniform(0,1) and Uniform(3,4)
-
-**Key Visualizations Included**:
-- Utility matrix heatmaps
-- Price distributions
-- Dissimilarity parameters by nest
-- Within-nest no-purchase utilities
-- Comprehensive statistical summaries
-
-#### Cardinality-Constrained Problem
-[`src/nl_cardinality_example.ipynb`](src/nl_cardinality_example.ipynb)
-
-This notebook covers:
-- Loading cardinality-constrained NL instances
-- Understanding constraint structures across nests
-- Implementing algorithms with nested cardinality constraints
-
-**Additional Constraints**:
-- Cardinality rates: {0.1, 0.3, 0.5} × (m × n)
-- Your algorithm must return a binary matrix of shape (m, n)
-- Constraint: `sum(assortment_i) <= cap_rate * n` for each nest `i`
-
----
-
-### General Workflow for All Notebooks
+### 2. General Workflow for All Notebooks
 
 Each notebook follows a consistent structure:
 
 1. **Import Required Modules**: Load necessary libraries and utility functions
-2. **Load Hard Instances**: Read pre-generated challenging instances from JSON files
+2. **Load Hard Instances**: Load pre-generated hard instances from JSON files `hard_data/`
 3. **Explore Instance Structure**: Visualize data distributions and problem characteristics
 4. **Implement Your Algorithm**: 
    ```python
@@ -273,17 +223,20 @@ Each notebook follows a consistent structure:
    assortment = your_algorithm(data.m, data.n, ...)
    ```
 5. **Evaluate Performance**: Calculate revenue and optimality gaps
-6. **Analyze Results**: Generate comprehensive statistics and visualizations
-7. **Save Results**: Export detailed performance metrics to Excel
+6. **Save Results**: Export detailed performance metrics to Excel
+7. **Analyze Results**: Generate comprehensive statistics and visualizations
 
-### Quick Start Example
+
+### 3. Quick Start Example
 
 ```python
-# Load instances
-from generator.utils import load_MNL_instances, load_NL_instances
+from generator.utils import load_MMNL_instances, load_NL_instances
+from models.mmnl_functions import get_revenue_function_mmnl
+from models.nl_functions import get_revenue_function_nl
 
+# Load instances
 # For MMNL
-instances = load_MNL_instances("hard_data/mmnl_unconstrained_RS2_data.json")
+instances = load_MMNL_instances("hard_data/mmnl_unconstrained_RS2_data.json")
 
 # For NL
 instances = load_NL_instances("hard_data/nl_card_01_data.json")
@@ -303,7 +256,7 @@ gap = (data.max_rev - revenue) / data.max_rev * 100
 print(f"Your gap: {gap:.2f}%")
 ```
 
-### Output and Analysis
+### 4. Output and Analysis
 
 Notebooks generate:
 - **Detailed statistics tables**: Mean, std, min, max gaps by problem size
@@ -323,9 +276,9 @@ This section provides detailed documentation for the main modules in this reposi
 
 The `generator/` directory contains functions for creating synthetic problem instances. These generators are used to create both the hard instances in `hard_data/` and allow you to generate custom instances.
 
-#### MMNL Data Generators
+- #### MMNL Data Generators
 
-Import all MMNL generators:
+The following is the data generation method of the MMNL model, you can import all generators as:
 ```python
 from generator.mmnl_data_generator import *
 ```
@@ -337,9 +290,9 @@ from generator.mmnl_data_generator import *
 | `mmnl_data_easy` | Following [Şen et al. (2018)](#Şen2018). Generates uniformly random utilities and prices with equal segment weights and no-purchase utility. |
 | `mmnl_data_hard` | Following [Şen et al. (2018)](#Şen2018). Creates sparse utility matrix where each customer type has only k products with positive utility. |
 
-#### NL Data Generators
+- #### NL Data Generators
 
-Import all NL generators:
+The following is the data generation method of the NL model, you can import all generators as:
 ```python
 from generator.nl_data_generator import *
 ```
@@ -359,7 +312,7 @@ from generator.nl_data_generator import *
 
 These functions generate various constraints for assortment optimization. Each returns `(A, B)` representing linear constraints $Ax \leq B$, where $x$ is the binary assortment vector.
 
-Import constraints:
+You can import them as:
 ```python
 from generator.constraint import *
 ```
@@ -367,7 +320,7 @@ from generator.constraint import *
 | Function | Description |
 | -------- | ----------- |
 | `cardinality` | Generates cardinality constraint: at most `cap` products can be selected. Returns constraint ensuring `sum(x) <= cap`. |
-| `card_nested_logit` | **NL-specific**. Restricts the maximum number of products within each nest. Returns `m` separate constraints, one per nest. |
+| `card_nested_logit` | NL-specific, which restricts the maximum number of products within each nest. Returns `m` separate constraints, one per nest. |
 | `cons_capacity` | Generates capacity constraints with different randomized structures for more complex scenarios. |
 
 ---
@@ -376,9 +329,9 @@ from generator.constraint import *
 
 These modules implement various optimization algorithms for solving assortment problems.
 
-#### General Methods
+- #### General Methods
 
-Import general methods:
+You can import general methods:
 ```python
 from method.general_method import *
 ```
@@ -387,9 +340,9 @@ from method.general_method import *
 | -------- | ----------- |
 | `revenue_order` | Revenue-ordered heuristic [[Talluri et al. (2004)](#Talluri2004)]. Sorts products by revenue and selects high-revenue items. Works for both MMNL and NL models. |
 
-#### MMNL-Specific Methods
+- #### MMNL-Specific Methods
 
-Import MMNL methods:
+You can import methods to solve the MMNL model:
 ```python
 from method.mmnl_method import *
 ```
@@ -398,9 +351,9 @@ from method.mmnl_method import *
 | -------- | ----------- |
 | `conic_mmnl_warm_start` | Exact method using conic integer programming formulation [[Şen et al. (2018)](#Şen2018)]. Finds globally optimal assortment using Gurobi solver. |
 
-#### NL-Specific Methods
+- #### NL-Specific Methods
 
-Import NL methods:
+You can import methods to solve the NL model:
 ```python
 from method.nl_method import *
 ```
@@ -415,7 +368,7 @@ from method.nl_method import *
 
 These modules provide functions to evaluate assortment performance and calculate revenues.
 
-#### MMNL Evaluation Functions
+- #### MMNL Evaluation Functions
 
 Import MMNL functions:
 ```python
@@ -426,7 +379,7 @@ from models.mmnl_functions import *
 | -------- | ----------- |
 | `get_revenue_function_mmnl` | Returns a revenue function for a given MMNL instance. The returned function takes an assortment and computes expected revenue. |
 
-#### NL Evaluation Functions
+- #### NL Evaluation Functions
 
 Import NL functions:
 ```python
@@ -440,8 +393,10 @@ from models.nl_functions import *
 ---
 
 ### 5. Utility Functions (`generator/utils.py`)
+The module provides helper functions for loading hard instances used in assortment optimization experiments.
 
-Import utilities:
+
+You can import them as:
 ```python
 from generator.utils import *
 ```
@@ -488,7 +443,7 @@ def my_new_heuristic(m, n, u, price, v0, omega, constraint=None):
         price: product prices (n,)
         v0: no-purchase utilities (m,)
         omega: segment weights (m,)
-        constraint: optional constraint tuple (A, B)
+        constraint: optional linear constraint (A, B) where A @ x <= B
     
     Returns:
         assortment: binary vector of length n
