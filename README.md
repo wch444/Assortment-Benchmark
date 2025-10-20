@@ -125,7 +125,7 @@ This section details the structure and configuration of the generated MMNL and N
 
 All datasets are stored in JSON format for easy parsing and reproducibility.
 
-#### MMNL (Mixed Multinomial Logit)
+#### 1) MMNL (Mixed Multinomial Logit)
 
 **File naming convention**: `mmnl_{constraint}_{revenue_curve}_data.json`
 - **Constraint types**:
@@ -142,7 +142,7 @@ All datasets are stored in JSON format for easy parsing and reproducibility.
   - Cardinality rates of constraints (cap_rate): {0.1, 0.3, 0.5}
   - Each (m, n, cap_rate`(if applicable)`) combination contains multiple instances with different random seeds
 
-#### NL (Nested Logit) 
+#### 2) NL (Nested Logit) 
 
 **File naming convention**: `nl_{constraint}_{vi0_method}_data.json`
 - **Constraint types**:
@@ -195,15 +195,15 @@ The easiest way to get started is to run the example Jupyter notebooks located i
 
 #### MMNL Model
 
-**Unconstrained Problem**: [`src/mmnl_unconstrained_example.ipynb`](src/mmnl_unconstrained_example.ipynb)
+- Unconstrained problem: [`src/mmnl_unconstrained_example.ipynb`](src/mmnl_unconstrained_example.ipynb)
 
-**Cardinality-Constrained Problem**:[`src/mmnl_cardinality_example.ipynb`](src/mmnl_cardinality_example.ipynb). Implement algorithms that respect cardinality constraints, your algorithm must satisfy: `sum(assortment) <= cap_rate * n`
+- Cardinality constrained problem: [`src/mmnl_cardinality_example.ipynb`](src/mmnl_cardinality_example.ipynb). Implement algorithms that respect cardinality constraints, your algorithm must satisfy: `sum(assortment) <= cap_rate * n`
 
 #### NL Model
 
-**Unconstrained Problem**:[`src/nl_unconstrained_example.ipynb`](src/nl_unconstrained_example.ipynb)
+- Unconstrained Problem:[`src/nl_unconstrained_example.ipynb`](src/nl_unconstrained_example.ipynb)
 
-**Cardinality-Constrained Problem**:[`src/nl_cardinality_example.ipynb`](src/nl_cardinality_example.ipynb). Implement algorithms with nested cardinality constraints `sum(assortment_i) <= cap_rate * n` for each nest `i`
+- Cardinality-Constrained Problem:[`src/nl_cardinality_example.ipynb`](src/nl_cardinality_example.ipynb). Implement algorithms with nested cardinality constraints `sum(assortment_i) <= cap_rate * n` for each nest `i`
 
 ---
 
@@ -211,17 +211,17 @@ The easiest way to get started is to run the example Jupyter notebooks located i
 
 Each notebook follows a consistent structure:
 
-1. **Import Required Modules**: Load necessary libraries and utility functions
-2. **Load Hard Instances**: Load pre-generated hard instances from JSON files `hard_data/`
-3. **Explore Instance Structure**: Visualize data distributions and problem characteristics
-4. **Implement Your Algorithm**: 
+&nbsp;&nbsp; (1) **Import Required Modules**: Load necessary libraries and utility functions
+&nbsp;&nbsp; (2) **Load Hard Instances**: Load pre-generated hard instances from JSON files `hard_data/`
+&nbsp;&nbsp; (3) **Explore Instance Structure**: Visualize data distributions and problem characteristics
+&nbsp;&nbsp; (4) **Implement Your Algorithm**: 
    ```python
    # TODO: Replace this section with your method
    assortment = your_algorithm(data.m, data.n, ...)
    ```
-5. **Evaluate Performance**: Calculate revenue and optimality gaps
-6. **Save Results**: Export detailed performance metrics to Excel
-7. **Analyze Results**: Generate comprehensive statistics and visualizations
+&nbsp;&nbsp; (5) **Evaluate Performance**: Calculate revenue and optimality gaps
+&nbsp;&nbsp; (6) **Save Results**: Export detailed performance metrics to Excel
+&nbsp;&nbsp; (7) **Analyze Results**: Generate comprehensive statistics and visualizations
 
 
 ### 3. Quick Start Example
