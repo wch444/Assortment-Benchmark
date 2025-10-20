@@ -127,36 +127,37 @@ All datasets are stored in JSON format for easy parsing and reproducibility.
 
 #### 1) MMNL (Mixed Multinomial Logit)
 
-  **File naming convention**: `mmnl_{constraint}_{revenue_curve}_data.json`
-  - Constraint types:
-    - `unconstrained`: No capacity constraints
-    - `card`: Cardinality constraint (limited number of products)
+**File naming convention**: `mmnl_{constraint}_{revenue_curve}_data.json`
+- Constraint types:
+  - `unconstrained`: No capacity constraints
+  - `card`: Cardinality constraint (limited number of products)
 
-  - Revenue curves: `RS2`: Revenue curve type 2
-    - `RS4`: Revenue curve type 4
+- Revenue curves: 
+  - `RS2`: Revenue curve type 2
+  - `RS4`: Revenue curve type 4
 
-  **Instance parameters configuration**:
-    - Number of products (n): {50, 100, 200}
-    - Number of customer segments (m): {5, 10, 25}
-    - Cardinality rates of constraints (cap_rate): {0.1, 0.3, 0.5}
-    - Each (m, n, cap_rate`(if applicable)`) combination contains multiple instances with different random seeds
+**Instance parameters configuration**:
+  - Number of products (n): {50, 100, 200}
+  - Number of customer segments (m): {5, 10, 25}
+  - Cardinality rates of constraints (cap_rate): {0.1, 0.3, 0.5}
+  - Each (m, n, cap_rate`(if applicable)`) combination contains multiple instances with different random seeds
 
 #### 2) NL (Nested Logit) 
 
-  **File naming convention**: `nl_{constraint}_{vi0_method}_data.json`
-  - Constraint types:
-    - `unconstrained`: No capacity constraints
-    - `card`: Cardinality constraint (limited number of products in each nest)
+**File naming convention**: `nl_{constraint}_{vi0_method}_data.json`
+- Constraint types:
+  - `unconstrained`: No capacity constraints
+  - `card`: Cardinality constraint (limited number of products in each nest)
 
-  - vi0 distribution methods:
-    - `01`: vi0 ~ Uniform(0, 1), low outside-nest utility
-    - `34`: vi0 ~ Uniform(3, 4), high outside-nest utility
+- vi0 distribution methods:
+  - `01`: vi0 ~ Uniform(0, 1), low outside-nest utility
+  - `34`: vi0 ~ Uniform(3, 4), high outside-nest utility
 
-  **Instance parameters configuration**:
-    - Number of nests (m): {5, 10, 20}
-    - Number of products per nest (n): {25, 50}
-    - Cardinality rates of constraints in each nest (cap_rate): {0.1, 0.3, 0.5} 
-    - Each (m, n, cap_rate`(if applicable)`) combination contains multiple instances with different random seeds
+**Instance parameters configuration**:
+  - Number of nests (m): {5, 10, 20}
+  - Number of products per nest (n): {25, 50}
+  - Cardinality rates of constraints in each nest (cap_rate): {0.1, 0.3, 0.5} 
+  - Each (m, n, cap_rate`(if applicable)`) combination contains multiple instances with different random seeds
 
 ---
 
@@ -210,17 +211,17 @@ The easiest way to get started is to run the example Jupyter notebooks located i
 
 Each notebook follows a consistent structure:
 
-    (1) **Import Required Modules**: Load necessary libraries and utility functions
-    (2) **Load Hard Instances**: Load pre-generated hard instances from JSON files `hard_data/`
-    (3) **Explore Instance Structure**: Visualize data distributions and problem characteristics
-     (4) **Implement Your Algorithm**: 
-   ```python
-   # TODO: Replace this section with your method
-   assortment = your_algorithm(data.m, data.n, ...)
-   ```
-    (5) **Evaluate Performance**: Calculate revenue and optimality gaps
-    (6) **Save Results**: Export detailed performance metrics to Excel
-    (7) **Analyze Results**: Generate comprehensive statistics and visualizations
+  (1) **Import Required Modules**: Load necessary libraries and utility functions
+  (2) **Load Hard Instances**: Load pre-generated hard instances from JSON files `hard_data/`
+  (3) **Explore Instance Structure**: Visualize data distributions and problem characteristics
+  (4) **Implement Your Algorithm**: 
+  ```python
+  # TODO: Replace this section with your method
+  assortment = your_algorithm(data.m, data.n, ...)
+  ```
+  (5) **Evaluate Performance**: Calculate revenue and optimality gaps
+  (6) **Save Results**: Export detailed performance metrics to Excel
+  (7) **Analyze Results**: Generate comprehensive statistics and visualizations
 
 
 ### 3. Quick Start Example
