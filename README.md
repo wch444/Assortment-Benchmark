@@ -211,17 +211,17 @@ The easiest way to get started is to run the example Jupyter notebooks located i
 
 Each notebook follows a consistent structure:
 
-  (1) **Import Required Modules**: Load necessary libraries and utility functions
-  (2) **Load Hard Instances**: Load pre-generated hard instances from JSON files `hard_data/`
-  (3) **Explore Instance Structure**: Visualize data distributions and problem characteristics
-  (4) **Implement Your Algorithm**: 
+- **Import Required Modules**: Load necessary libraries and utility functions
+-  **Load Hard Instances**: Load pre-generated hard instances from JSON files `hard_data/`
+-   **Explore Instance Structure**: Visualize data distributions and problem characteristics
+-    **Implement Your Algorithm**: 
   ```python
   # TODO: Replace this section with your method
   assortment = your_algorithm(data.m, data.n, ...)
   ```
-  (5) **Evaluate Performance**: Calculate revenue and optimality gaps
-  (6) **Save Results**: Export detailed performance metrics to Excel
-  (7) **Analyze Results**: Generate comprehensive statistics and visualizations
+- **Evaluate Performance**: Calculate revenue and optimality gaps
+- **Save Results**: Export detailed performance metrics to Excel
+- **Analyze Results**: Generate comprehensive statistics and visualizations
 
 
 ### 3. Quick Start Example
