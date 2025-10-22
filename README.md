@@ -1,8 +1,8 @@
-# Hard Instance for Assortment Optimization under MMNL and NL Choice Models
+# Hard Instances for Assortment Optimization under MMNL and NL Choice Models
 
-This repository provides a framework for testing the hard assortment optimization problems under two popular discrete choice models: the **Mixed Multinomial Logit (MMNL)** and **Nested Logit (NL)** choice models.  
+This repository provides a benchmark dataset for the assortment optimization problems under two popular discrete choice models: the **Mixed Multinomial Logit (MMNL)** and **Nested Logit (NL)** choice models.  
 
-This project provides the hard instances we obtained in the paper, and to test the performance of a given method. The code is designed for **reproducibility, extensibility, and comparability**.
+This benchmark provides hard instances we generated using a systematic approach (see our companion paper), and an accessible interface to test the performance of an algorithm designed by you. The code is designed for **reproducibility, extensibility, and comparability**.
 
 ---
 
