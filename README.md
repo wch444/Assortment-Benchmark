@@ -76,6 +76,8 @@ This `hard_data/` folder provides **pre-generated challenging instances** for be
 
 All instances is stored in JSON format and can be loaded directly using utility functions in `generator/utils.py`.
 
+Below we describe how we generate and select these hard instances.
+
 ---
 
 ### 1. Instance Generation
