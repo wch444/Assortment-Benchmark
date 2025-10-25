@@ -143,7 +143,7 @@ All datasets are stored in JSON format for easy parsing and reproducibility.
 
 **File naming convention**: `nl_{constraint}_{vi0_method}_data.json`
 - Constraint types: `unconstrained`, `card` (cardinality per nest)
-- vi0 distribution methods: `01` (vi0 ~ U(0, 1), low within-nest utility), `34`: vi0 ~ U(3, 4), high within-nest utility
+- vi0 distribution methods: `01` (vi0 ~ U(0, 1), low within-nest utility), `34` (vi0 ~ U(3, 4), high within-nest utility)
 
 **Instance parameters configuration**:
   - Number of nests (m): {5, 10, 20}
