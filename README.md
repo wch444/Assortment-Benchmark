@@ -2,7 +2,7 @@
 
 This repository provides a benchmark dataset for the assortment optimization problems under two popular discrete choice models: the **Mixed Multinomial Logit (MMNL)** and **Nested Logit (NL)** choice models.  
 
-This benchmark provides hard instances we generated using a systematic approach (see our companion paper), and an accessible interface to test the performance of an algorithm designed by you. The code is designed for **reproducibility, extensibility, and comparability**.
+This benchmark provides hard instances we generated using a systematic approach (see our paper), and an accessible interface to test the performance of an algorithm designed by you. The code is designed for **reproducibility, extensibility, and comparability**.
 
 ---
 
@@ -427,7 +427,7 @@ This codebase is designed to be easily extensible:
 - **Define custom constraints**: Extend `generator/constraint.py` with new constraint types
 - **Support new choice models**: Create new modules following the structure of existing `models/` files
 
-### Example: Adding a New Heuristic
+### Example: Adding a New Method
 
 ```python
 # In method/mmnl_method.py
