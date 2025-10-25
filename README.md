@@ -130,14 +130,9 @@ All datasets are stored in JSON format for easy parsing and reproducibility.
 #### 1) MMNL (Mixed Multinomial Logit)
 
 **File naming convention**: `mmnl_{constraint}_{revenue_curve}_data.json`
-- Constraint types:
-  - `unconstrained`: No capacity constraints
-  - `card`: Cardinality constraint (limited number of products)
-
-- Revenue curves: 
-  - `RS2`: Revenue curve type 2
-  - `RS4`: Revenue curve type 4
-
+- Constraint types: `unconstrained`, `card` (cardinality)
+- Revenue curves: `RS2`, `RS4`
+ 
 **Instance parameters configuration**:
   - Number of products (n): {50, 100, 200}
   - Number of customer segments (m): {5, 10, 25}
@@ -147,13 +142,8 @@ All datasets are stored in JSON format for easy parsing and reproducibility.
 #### 2) NL (Nested Logit) 
 
 **File naming convention**: `nl_{constraint}_{vi0_method}_data.json`
-- Constraint types:
-  - `unconstrained`: No capacity constraints
-  - `card`: Cardinality constraint (limited number of products in each nest)
-
-- vi0 distribution methods:
-  - `01`: vi0 ~ Uniform(0, 1), low outside-nest utility
-  - `34`: vi0 ~ Uniform(3, 4), high outside-nest utility
+- Constraint types: `unconstrained`, `card` (cardinality per nest)
+- vi0 distribution methods: `01` (vi0 ~ U(0, 1), low within-nest utility), `34`: vi0 ~ U(3, 4), high within-nest utility
 
 **Instance parameters configuration**:
   - Number of nests (m): {5, 10, 20}
@@ -260,7 +250,7 @@ print(f"Your gap: {gap:.2f}%")
 Notebooks generate:
 - **Detailed statistics tables**: Mean, std, min, max gaps by problem size
 - **Visualizations**: Box plots, bar charts, distribution analyses
-- **Excel reports**: Comprehensive results saved to `results/` folder
+- **Excel reports**: Comprehensive results saved to `results/{model}_summary_statistics.xlsx` folder
 - **Performance comparisons**: Side-by-side analysis across methods and parameters
 
 ---
