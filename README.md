@@ -452,7 +452,7 @@ This project is released under the MIT License.
 
 ## 🙌 Acknowledgments
 
-This codebase is part of ongoing research on **Solving Hard Assortment Optimization Problems with Instance-Specific Neural Optimizer: A Theoretical and Computational Analysis**.  
+This codebase is part of ongoing research on **Solving Assortment Optimization with First-Order Methods and Neural Networks: A Computational Framework and Public Benchmark**.  
 
 If you use this repository, please cite it in your work.
 
