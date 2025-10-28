@@ -452,7 +452,7 @@ This project is released under the MIT License.
 
 ## 🙌 Acknowledgments
 
-This codebase is part of ongoing research on **Solving Assortment Optimization with First-Order Methods and Neural Networks: A Computational Framework and Public Benchmark** [link](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5671592)
+This repository accompanies the ongoing work  **Solving Assortment Optimization with First-Order Methods and Neural Networks: A Computational Framework and Public Benchmark** [link](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5671592)
 
 If you use this repository, please cite it in your work.
 
