@@ -1,8 +1,8 @@
 # Hard Instances for Assortment Optimization under MMNL and NL Choice Models
 
-This repository provides a dataset for the assortment optimization problems under two popular discrete choice models: the **Mixed Multinomial Logit (MMNL)** and **Nested Logit (NL)** choice models.  
+This repository provides a benchmark dataset for the assortment optimization problems under two popular discrete choice models: the **Mixed Multinomial Logit (MMNL)** and **Nested Logit (NL)** choice models.  
 
-This dataset provides hard instances we generated using a systematic approach (see our paper), and an accessible interface to test the performance of an algorithm designed by you. The code is designed for **reproducibility, extensibility, and comparability**.
+This benchmark provides hard instances we generated using a systematic approach (see our paper), and an accessible interface to test the performance of an algorithm designed by you. The code is designed for **reproducibility, extensibility, and comparability**.
 
 ---
 
@@ -453,9 +453,23 @@ This project is released under the MIT License.
 
 ## 🙌 Acknowledgments
 
-This repository accompanies the ongoing work [link](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5671592)
+This repository accompanies the ongoing work  **Solving Assortment Optimization with First-Order Methods and Neural Networks: A Computational Framework and Public Benchmark** [link](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5671592)
 
 If you use this repository, please cite it in your work.
+
+### Citation
+
+Use the following BibTeX:
+```bibtex
+@misc{GuoLagziWangEtAl2025,
+  title = {Solving Assortment Optimization with First-Order Methods and Neural Networks: A Computational Framework and Public Benchmark},
+  author = {Guo, Qing and Lagzi, Saman and Wang, Chenhao and Chen, Ningyuan and Gallego, Guillermo and Kunnumkal, Sumit and Wang, Yao and Yu, Li},
+  year = {2025},
+  howpublished = {SSRN Electronic Journal},
+  url = {https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5671592},
+  note = {Available at SSRN: \url{https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5671592}}
+}
+```
 
 
 ## 📖 References
