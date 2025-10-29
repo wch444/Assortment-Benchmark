@@ -457,19 +457,6 @@ This repository accompanies the ongoing work [link](https://papers.ssrn.com/sol3
 
 If you use this repository, please cite it in your work.
 
-### Citation
-
-Use the following BibTeX:
-```bibtex
-@misc{GuoLagziWangEtAl2025,
-  title = {Solving Assortment Optimization with First-Order Methods and Neural Networks: A Computational Framework and Public Benchmark},
-  author = {Guo, Qing and Lagzi, Saman and Wang, Chenhao and Chen, Ningyuan and Gallego, Guillermo and Kunnumkal, Sumit and Wang, Yao and Yu, Li},
-  year = {2025},
-  howpublished = {SSRN Electronic Journal},
-  url = {https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5671592},
-  note = {Available at SSRN: \url{https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5671592}}
-}
-```
 
 ## 📖 References
 <a id="Rogosinski2024"></a> [1] Rogosinski S, Müller S, Reyes-Rubiano L. Distribution-specific approximation guarantees for the random-parameters logit assortment problem[J]. 2024.  
