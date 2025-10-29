@@ -1,8 +1,8 @@
 # Hard Instances for Assortment Optimization under MMNL and NL Choice Models
 
-This repository provides a benchmark dataset for the assortment optimization problems under two popular discrete choice models: the **Mixed Multinomial Logit (MMNL)** and **Nested Logit (NL)** choice models.  
+This repository provides a dataset for the assortment optimization problems under two popular discrete choice models: the **Mixed Multinomial Logit (MMNL)** and **Nested Logit (NL)** choice models.  
 
-This benchmark provides hard instances we generated using a systematic approach (see our paper), and an accessible interface to test the performance of an algorithm designed by you. The code is designed for **reproducibility, extensibility, and comparability**.
+This dataset provides hard instances we generated using a systematic approach (see our paper), and an accessible interface to test the performance of an algorithm designed by you. The code is designed for **reproducibility, extensibility, and comparability**.
 
 ---
 
@@ -27,6 +27,7 @@ root/
 │    ├── nl_functions.py        # NL-specific functions
 │
 │── src/                        # Example notebooks
+│    ├── plot.py                         # Functions for data analysis and visualization
 │    ├── mmnl_cardinality_example.ipynb  # MMNL with cardinality constraint
 │    ├── mmnl_unconstrained_example.ipynb # MMNL unconstrained problem
 │    ├── nl_cardinality_example.ipynb    # NL with cardinality constraint
@@ -452,7 +453,7 @@ This project is released under the MIT License.
 
 ## 🙌 Acknowledgments
 
-This repository accompanies the ongoing work  **Solving Assortment Optimization with First-Order Methods and Neural Networks: A Computational Framework and Public Benchmark** [link](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5671592)
+This repository accompanies the ongoing work [link](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5671592)
 
 If you use this repository, please cite it in your work.
 
