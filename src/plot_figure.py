@@ -527,8 +527,12 @@ def plot_comparison_boxplots(df, method_col, group_col):
             ax=axes[idx],
             palette="Set3",
             width=0.6,
-            legend=False,
         )
+        
+        # Remove legend if it exists (seaborn may create one with hue parameter)
+        legend = axes[idx].get_legend()
+        if legend is not None:
+            legend.remove()
 
         axes[idx].set_xlabel(
             f"{group_col} Combinations", fontsize=11, fontweight="bold"
