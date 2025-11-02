@@ -54,112 +54,129 @@ root/
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Python 3.9 or higher (3.9, 3.10, 3.11, or 3.12)
-- Unix-like shell (bash/zsh) for macOS/Linux/WSL
+- **Python**: Version 3.9 or higher (supports 3.9, 3.10, 3.11, and 3.12)
+- **Shell**: Unix-like shell (bash/zsh) for macOS/Linux/WSL users
 
 ### Installation
 
-#### Option 1: Automated Setup (Recommended)
-
-Run the setup script to automatically install dependencies and create a virtual environment:
+#### Step 1: Clone the Repository
 
 ```bash
-# Make the script executable (first time only)
+git clone https://github.com/wch444/Assortment-Benchmark.git
+cd Assortment-Benchmark
+```
+
+#### Step 2: Set Up Environment
+
+Choose one of the following methods based on your preference:
+
+##### Option 1: Automated Setup (Recommended)
+
+Use our setup script for hassle-free installation:
+
+```bash
+# Grant execute permission (first time only)
 chmod +x setup_env.sh
 
 # Run the setup script
 ./setup_env.sh
 ```
 
-The script will:
-1. ✅ Check and install `uv` (fast Python package installer) if needed
-2. ✅ Let you choose Python version (3.9-3.12 or system default)
-3. ✅ Create a virtual environment
-4. ✅ Install all required dependencies
-5. ✅ Verify the installation
+**What the script does:**
+1. ✅ Checks and installs `uv` (ultra-fast Python package installer) if needed
+2. ✅ Prompts you to select Python version (3.9-3.12 or system default)
+3. ✅ Creates an isolated virtual environment
+4. ✅ Installs all required dependencies from `requirements.txt`
+5. ✅ Verifies installation and displays installed packages
 
 **Platform Support:**
 - ✅ macOS
-- ✅ Linux
+- ✅ Linux  
 - ✅ Windows WSL (Windows Subsystem for Linux)
-- ⚠️ Windows (requires manual uv installation)
+- ⚠️  Native Windows (requires manual uv installation via PowerShell)
 
-#### Option 2: Manual Setup
+---
 
-If you prefer manual installation or the script doesn't work on your system:
+##### Option 2: Manual Setup with uv
+
+For users who prefer manual control:
 
 ```bash
 # Install uv (if not already installed)
-# macOS/Linux:
+# macOS/Linux/WSL:
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Windows (PowerShell):
+# Windows (PowerShell as Administrator):
 # powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
 
-# Create virtual environment
+# Create a Python 3.11 virtual environment
 uv venv --python 3.11 .venv-py311
 
 # Install dependencies
 uv pip install --python .venv-py311 -r requirements.txt
 
 # Activate the environment
-source .venv-py311/bin/activate  # macOS/Linux
-# .venv-py39\Scripts\activate  # Windows
-```
-
-### Running the Examples
-
-After setup, activate the virtual environment and run Jupyter:
-
-```bash
-# Activate environment
-source .venv-py311/bin/activate  # or whichever Python version you chose
-
-# Start Jupyter Notebook
-jupyter notebook
-
-# Or open directly in VS Code
-# Just open any .ipynb file and select the correct kernel
+source .venv-py311/bin/activate  # macOS/Linux/WSL
+# .venv-py311\Scripts\activate    # Windows
 ```
 
 ---
 
-## ⚙️ Additional Notes
+##### Option 3: Traditional pip Installation
 
-### Required Dependencies
-
-The project requires the following Python packages (automatically installed by `setup_env.sh`):
-- Python (>=3.9, <=3.12)
-- numpy>=1.20,<3.0
-- pandas>=1.3,<3.0
-- matplotlib>=3.0,<4.0
-- seaborn>=0.11,<1.0
-- openpyxl>=3.0,<4.0
-- ipykernel>=6.0,<7.0
-
-### Optional: Gurobi Solver
-
-For exact optimization methods (e.g., `conic_mmnl_warm_start`), you need Gurobi:
-- gurobipy>=11.0,<13.0
-
-> **Note:** Gurobi must be installed separately and requires a valid license. You can download it from [Gurobi's official website](https://www.gurobi.com/). Academic licenses are free for qualifying users. The heuristic methods in this repository work without Gurobi.
-
-### Alternative: Using pip Directly
-
-If you prefer to use pip instead of uv:
+If you prefer the standard Python toolchain:
 
 ```bash
-# Clone the repository
-git clone https://github.com/wch444/Assortment-Benchmark.git
-cd Assortment-Benchmark
-
-# Create virtual environment
+# Create virtual environment with Python 3.11
 python3.11 -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Activate the environment
+source .venv/bin/activate          # macOS/Linux/WSL
+# .venv\Scripts\activate            # Windows
 
 # Install dependencies
 pip install -r requirements.txt
 ```
+
+---
+
+### Running the Examples
+
+Once the environment is set up, you can run the example notebooks:
+
+```bash
+# Activate the virtual environment (if not already activated)
+source .venv-py311/bin/activate  # Use the appropriate environment name
+
+# Launch Jupyter Notebook
+jupyter notebook
+```
+
+**Using VS Code:**
+1. Open any `.ipynb` file in the `src/` directory
+2. Click the **kernel selector** in the top-right corner
+3. Select your virtual environment (e.g., `.venv-py311`)
+4. Run the notebook cells
+
+---
+
+### Dependencies
+
+**Core Dependencies** (automatically installed):
+- Python ≥ 3.9, ≤ 3.12
+- numpy ≥ 1.20, < 3.0
+- pandas ≥ 1.3, < 3.0
+- matplotlib ≥ 3.0, < 4.0
+- seaborn ≥ 0.11, < 1.0
+- openpyxl ≥ 3.0, < 4.0
+- ipykernel ≥ 6.0, < 7.0
+
+**Optional: Gurobi Solver**
+
+For exact optimization methods (e.g., `conic_mmnl_warm_start`):
+- gurobipy ≥ 11.0, < 13.0
+
+> **📌 Note**: Gurobi requires separate installation and a valid license. Download from [Gurobi's official website](https://www.gurobi.com/). **Academic licenses are free** for qualifying users. All heuristic methods work without Gurobi.
 
 ---
 
@@ -347,158 +364,6 @@ Notebooks generate:
 
 ---
 
-## 📚 Module Documentation
-
-This section provides detailed documentation for the main modules in this repository. These modules support data generation, constraint modeling, optimization algorithms, and performance evaluation.
-
----
-
-### 1. Data Generators (`generator/`)
-
-The `generator/` directory contains functions for creating synthetic problem instances. These generators are used to create both the hard instances in `hard_data/` and allow you to generate custom instances.
-
-- #### MMNL Data Generators
-
-The following is the data generation method of the MMNL model, you can import all generators as:
-```python
-from generator.mmnl_data_generator import *
-```
-
-| Function | Description |
-| -------- | ----------- |
-| `mmnl_data_v0_lognorm` | **Used for hard instances**. Captures continuous heterogeneity among customer segments with log-normal no-purchase utilities `v0`. Supports multiple product revenue curves (RS2, RS4). |
-| `mmnl_data_random` | Randomly generates utilities and prices, with no-purchase utility taking values 1 or 5 for half of the segments. |
-| `mmnl_data_easy` | Following [Şen et al. (2018)](#Şen2018). Generates uniformly random utilities and prices with equal segment weights and no-purchase utility. |
-| `mmnl_data_hard` | Following [Şen et al. (2018)](#Şen2018). Creates sparse utility matrix where each customer type has only k products with positive utility. |
-
-- #### NL Data Generators
-
-The following is the data generation method of the NL model, you can import all generators as:
-```python
-from generator.nl_data_generator import *
-```
-
-| Function | Description |
-| -------- | ----------- |
-| `nl_data_vi0_uniform01` | **Used for hard instances**. Extension of `nested_data_NewBounds` with low within-nest no-purchase utility `vi0 ~ U(0, 1)`. |
-| `nl_data_vi0_uniform34` | **Used for hard instances**. Extension of `nested_data_NewBounds` with high within-nest no-purchase utility `vi0 ~ U(3, 4)`. |
-| `nl_data_vi0_lognormal` | Extension of `nested_data_NewBounds` with long-tail distribution `vi0 ~ LogNormal(μ=1, σ=0.5)` clipped to [1, 5]. |
-| `nested_data_NewBounds` | Following [Kunnumkal (2023)](#Kunnumkal2023). Creates nested structure with smooth price-utility relationships. |
-| `nested_data_random` | Following [Gallego et al. (2024)](#Gallego2024). Generates random prices and utilities within user-defined ranges. |
-| `nested_data_complex` | Following [Davis et al. (2014)](#Davis2014). Generates complex nested data with nonlinear interactions. |
-
----
-
-### 2. Constraint Generators (`generator/constraint.py`)
-
-These functions generate various constraints for assortment optimization. Each returns `(A, B)` representing linear constraints $Ax \leq B$, where $x$ is the binary assortment vector.
-
-You can import them as:
-```python
-from generator.constraint import *
-```
-
-| Function | Description |
-| -------- | ----------- |
-| `cardinality` | Generates cardinality constraint: at most `cap` products can be selected. Returns constraint ensuring `sum(x) <= cap`. |
-| `card_nested_logit` | NL-specific, which restricts the maximum number of products within each nest. Returns `m` separate constraints, one per nest. |
-| `cons_capacity` | Generates capacity constraints with different randomized structures for more complex scenarios. |
-
----
-
-### 3. Optimization Methods (`method/`)
-
-These modules implement various optimization algorithms for solving assortment problems.
-
-- #### General Methods
-
-You can import general methods:
-```python
-from method.general_method import *
-```
-
-| Function | Description |
-| -------- | ----------- |
-| `revenue_order` | Revenue-ordered heuristic [[Talluri et al. (2004)](#Talluri2004)]. Sorts products by revenue and selects high-revenue items. Works for both MMNL and NL models. |
-
-- #### MMNL-Specific Methods
-
-You can import methods to solve the MMNL model:
-```python
-from method.mmnl_method import *
-```
-
-| Function | Description |
-| -------- | ----------- |
-| `conic_mmnl_warm_start` | Exact method using conic integer programming formulation [[Şen et al. (2018)](#Şen2018)]. Finds globally optimal assortment using Gurobi solver. |
-
-- #### NL-Specific Methods
-
-You can import methods to solve the NL model:
-```python
-from method.nl_method import *
-```
-
-| Function | Description |
-| -------- | ----------- |
-| `revenue_order_nl` | LP-based algorithm [[Davis et al. (2014)](#Davis2014)] where each nest contains the $k_i$ highest-revenue products. |
-
----
-
-### 4. Evaluation Functions (`models/`)
-
-These modules provide functions to evaluate assortment performance and calculate revenues.
-
-- #### MMNL Evaluation Functions
-
-Import MMNL functions:
-```python
-from models.mmnl_functions import *
-```
-
-| Function | Description |
-| -------- | ----------- |
-| `get_revenue_function_mmnl` | Returns a revenue function for a given MMNL instance. The returned function takes an assortment and computes expected revenue. |
-
-- #### NL Evaluation Functions
-
-Import NL functions:
-```python
-from models.nl_functions import *
-```
-
-| Function | Description |
-| -------- | ----------- |
-| `get_revenue_function_nl` | Returns a revenue function for a given NL instance. The returned function takes an assortment matrix and computes expected revenue. |
-
----
-
-### 5. Utility Functions (`generator/utils.py`)
-The module provides helper functions for loading hard instances used in assortment optimization experiments.
-
-
-You can import them as:
-```python
-from generator.utils import *
-```
-
-| Function | Description |
-| -------- | ----------- |
-| `load_MNL_instances` | Loads MMNL instances from JSON file. Returns list of instance objects with all problem parameters and optimal solutions. |
-| `load_NL_instances` | Loads NL instances from JSON file. Returns list of instance objects with nest structures and optimal solutions. |
-
----
-
-## 🧩 Key Features
-
-- **Two choice models supported**: Mixed Multinomial Logit (MMNL) and Nested Logit (NL)
-- **Multiple data generators**: Create custom instances or use pre-generated hard instances
-- **Flexible constraints**: Cardinality, capacity, and nest-specific constraints
-- **Exact and heuristic solvers**: Gurobi-based exact methods and fast heuristics
-- **Comprehensive evaluation**: Built-in functions for computing revenues and optimality gaps
-- **Reproducibility**: All instances include random seeds for exact replication
-
----
 
 ## 🛠️ Extending the Framework
 
