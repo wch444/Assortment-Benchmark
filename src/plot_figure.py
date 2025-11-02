@@ -316,7 +316,6 @@ def explore_instance(data, model_type):
         ax3.set_xticks(range(len(v0)))
         ax3.set_xticklabels([f"S{i+1}" for i in range(len(v0))])
         ax3.grid(True, alpha=0.3, axis="y")
-        ax3.legend()
         # (4) Segment Probability Pie Chart
         ax4 = plt.subplot(2, 3, 4)
         colors = plt.cm.Set3(range(len(omega)))
