@@ -44,8 +44,82 @@ root/
 │    └── nl_unconstrained_34_data.json   # NL unconstrained - vi0 ~ Uniform(3,4)
 │
 │── requirements.txt            # Python dependencies
+│── setup_env.sh                # Environment setup script (cross-platform)
 │── README.md                   # Project documentation
 
+```
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Python 3.9 or higher (3.9, 3.10, 3.11, or 3.12)
+- Unix-like shell (bash/zsh) for macOS/Linux/WSL
+
+### Installation
+
+#### Option 1: Automated Setup (Recommended)
+
+Run the setup script to automatically install dependencies and create a virtual environment:
+
+```bash
+# Make the script executable (first time only)
+chmod +x setup_env.sh
+
+# Run the setup script
+./setup_env.sh
+```
+
+The script will:
+1. ✅ Check and install `uv` (fast Python package installer) if needed
+2. ✅ Let you choose Python version (3.9-3.12 or system default)
+3. ✅ Create a virtual environment
+4. ✅ Install all required dependencies
+5. ✅ Verify the installation
+
+**Platform Support:**
+- ✅ macOS
+- ✅ Linux
+- ✅ Windows WSL (Windows Subsystem for Linux)
+- ⚠️ Windows (requires manual uv installation)
+
+#### Option 2: Manual Setup
+
+If you prefer manual installation or the script doesn't work on your system:
+
+```bash
+# Install uv (if not already installed)
+# macOS/Linux:
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Windows (PowerShell):
+# powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# Create virtual environment
+uv venv --python 3.11 .venv-py311
+
+# Install dependencies
+uv pip install --python .venv-py311 -r requirements.txt
+
+# Activate the environment
+source .venv-py311/bin/activate  # macOS/Linux
+# .venv-py39\Scripts\activate  # Windows
+```
+
+### Running the Examples
+
+After setup, activate the virtual environment and run Jupyter:
+
+```bash
+# Activate environment
+source .venv-py311/bin/activate  # or whichever Python version you chose
+
+# Start Jupyter Notebook
+jupyter notebook
+
+# Or open directly in VS Code
+# Just open any .ipynb file and select the correct kernel
 ```
 
 ---
