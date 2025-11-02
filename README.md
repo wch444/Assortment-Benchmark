@@ -124,31 +124,42 @@ jupyter notebook
 
 ---
 
-## ⚙️ Installation
+## ⚙️ Additional Notes
 
-To get started with this project, follow these steps.
+### Required Dependencies
 
-```bash
-git clone https://github.com/wch444/Assortment-Benchmark.git
-```
+The project requires the following Python packages (automatically installed by `setup_env.sh`):
+- Python (>=3.9, <=3.12)
+- numpy>=1.20,<3.0
+- pandas>=1.3,<3.0
+- matplotlib>=3.0,<4.0
+- seaborn>=0.11,<1.0
+- openpyxl>=3.0,<4.0
+- ipykernel>=6.0,<7.0
 
-For install dependencies, the project requires the following:
-- Python (>=3.9, <3.12)
-- Numpy>=1.20,<3.0
-- Pandas>=1.3,<3.0
-- Matplotlib>=3.0
-- Seaborn>=0.11
-- Openpyxl>=3.0
-- ipykernel>=6.0
+### Optional: Gurobi Solver
 
-For using solver, you need Gurobi
+For exact optimization methods (e.g., `conic_mmnl_warm_start`), you need Gurobi:
 - gurobipy>=11.0,<13.0
 
-You can use the requirements.txt files with pip to install a fully predetermined and working environment.
+> **Note:** Gurobi must be installed separately and requires a valid license. You can download it from [Gurobi's official website](https://www.gurobi.com/). Academic licenses are free for qualifying users. The heuristic methods in this repository work without Gurobi.
+
+### Alternative: Using pip Directly
+
+If you prefer to use pip instead of uv:
+
 ```bash
+# Clone the repository
+git clone https://github.com/wch444/Assortment-Benchmark.git
+cd Assortment-Benchmark
+
+# Create virtual environment
+python3.11 -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Install dependencies
 pip install -r requirements.txt
 ```
-> **Note:** Gurobi must be installed separately. You can download it from [Gurobi's official website](https://www.gurobi.com/) and obtain a valid license for activation.
 
 ---
 
