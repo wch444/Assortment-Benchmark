@@ -59,7 +59,7 @@ git clone https://github.com/wch444/Assortment-Benchmark.git
 ```
 
 For install dependencies, the project requires the following:
-- Python (>3.9, <3.12)
+- Python (>=3.9, <3.12)
 - Numpy>=1.20,<3.0
 - Pandas>=1.3,<3.0
 - Matplotlib>=3.0
