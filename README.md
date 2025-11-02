@@ -13,9 +13,9 @@ This benchmark provides hard instances we generated using a systematic approach 
 - [Quick Start](#-quick-start)
 - [Hard Instance Data](#-hard-instance-data)
 - [User Guide](#-user-guide)
-- [Module Documentation](#-module-documentation)
-- [Extending the Framework](#-extending-the-framework)
-- [Citation](#citation)
+- [Extending the Framework](#️-extending-the-framework)
+- [License](#-license)
+- [Acknowledgments](#-acknowledgments)
 - [References](#-references)
 
 ---
