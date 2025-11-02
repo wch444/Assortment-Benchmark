@@ -65,6 +65,7 @@ For install dependencies, the project requires the following:
 - Matplotlib>=3.0
 - Seaborn>=0.11
 - Openpyxl>=3.0
+
 For using solver, you need Gurobi
 - gurobipy>=11.0,<13.0
 
