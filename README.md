@@ -59,10 +59,14 @@ git clone https://github.com/wch444/Assortment-Benchmark.git
 ```
 
 For install dependencies, the project requires the following:
-- Python (=3.11.13)
-- NumPy (=2.3.2)
-- Pandas (=12.0.3)
-- Gurobi (=12.0.3)
+- Python (>3.9, <3.12)
+- Numpy>=1.20,<3.0
+- Pandas>=1.3,<3.0
+- Matplotlib>=3.0
+- Seaborn>=0.11
+- Openpyxl>=3.0
+For using solver, you need Gurobi
+- gurobipy>=11.0,<13.0
 
 You can use the requirements.txt files with pip to install a fully predetermined and working environment.
 ```bash
