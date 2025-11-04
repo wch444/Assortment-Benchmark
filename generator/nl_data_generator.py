@@ -88,10 +88,6 @@ def nested_data_complex(m, n,gamma_range=[0.5,1], full_capture=None, epsilon=0.6
         vi0 = epsilon * 1e-4
     else:
         vi0 = v0
-
-    sorted_indices = np.argsort(v, axis=1)
-    price = np.take_along_axis(price, sorted_indices, axis=1)
-    v = np.take_along_axis(v, sorted_indices, axis=1)
     return NLData(price, v, gamma, v0, vi0)
 
 def nested_data_random(m, n, gamma_range, full_capture=None, price_range=[100,250], seed=None):
@@ -124,10 +120,6 @@ def nested_data_random(m, n, gamma_range, full_capture=None, price_range=[100,25
     else:
         vi0 = rng.uniform(0, 4, size=m)
     v0 = 10
-
-    sorted_indices = np.argsort(v, axis=1)
-    price = np.take_along_axis(price, sorted_indices, axis=1)
-    v = np.take_along_axis(v, sorted_indices, axis=1)
     return NLData(price, v, gamma, v0, vi0)
 
 def nested_data_NewBounds(m, n, gamma_range, full_capture=None, seed=None):
@@ -162,10 +154,6 @@ def nested_data_NewBounds(m, n, gamma_range, full_capture=None, seed=None):
         vi0 = 1e-4
     else:
         vi0 = v0
-
-    sorted_indices = np.argsort(v, axis=1)
-    price = np.take_along_axis(price, sorted_indices, axis=1)
-    v = np.take_along_axis(v, sorted_indices, axis=1)
     return NLData(price, v, gamma, v0, vi0)
 
 
