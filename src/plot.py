@@ -170,20 +170,26 @@ def explore_instance(data, model_type):
     seed = getattr(data, "seed", None)
     cap_rate = getattr(data, "cap_rate", None)
     max_rev = getattr(data, "max_rev", None)
+    upper_bound = getattr(data, "upper_bound", None)
+    best_rev = getattr(data, "best_rev", None)
+    best_ass = getattr(data, "best_ass", None)
 
     if model_type.upper() == "NL":
         print(f"Number of customer segments (m): {m}")
         print(f"Number of products (n): {n}")
+        print(f"Random seed: {seed}")
+        print(f"Capacity rate: {cap_rate}")
+        print(f"Upper bound of revenue : {upper_bound:.4f}")
+        print(f"Best revenue found: {best_rev:.4f}")
     else:
         print(f"Number of nests (m): {m}")
         print(f"Number of products per nest (n): {n}")
         print(f"Total number of products: {m * n if m and n else 'N/A'}")
-
-    print(f"Random seed: {seed}")
-    print(f"Capacity rate: {cap_rate}")
-    if max_rev is not None:
+        print(f"Random seed: {seed}")
+        print(f"Capacity rate: {cap_rate}")
         print(f"Maximum revenue (optimal): {max_rev:.4f}")
 
+    print(f"Best assortment found: {best_ass}")
     # =============================================================================
     # DATA COMPONENTS - DIMENSIONS
     # =============================================================================

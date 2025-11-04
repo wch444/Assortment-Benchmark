@@ -173,7 +173,9 @@ nl_instances = load_NL_instances("hard_data/nl_unconstrained_01_data.json")
 Each instance contains:
 - **Problem parameters**: m, n, cap_rate (if applicable)
 - **Random seed**: For reproducibility
-- **Optimal revenue**: Corresponding optimal revenue (max_rev)
+- **Optimal revenue**: Optimal revenue (max_rev for MMNL) or upper bound (upper_bound for NL)
+- **Best-found revenues**: Maximum revenue obtained across all evaluations (max_rev of MMNL, best_rev for NL)
+- **Corresponding assortment**: Corresponding assortment (best_ass)
 - **Related data**: u, price, v0, omega (for MMNL); price, v, gamma, v0, vi0 (for NL)
 
 ---
@@ -234,7 +236,10 @@ instances = load_NL_instances("hard_data/nl_card_01_data.json")
 # Access instance data
 data = instances[0]
 print(f"Problem size: m={data.m}, n={data.n}")
-print(f"Optimal revenue: {data.max_rev:.4f}")
+opt_rev = data.max_rev # For MMNL
+opt_rev = data.upper_bound # For NL
+print(f"Optimal revenue: {opt_rev:.4f}") # For MMNL
+print(f"Optimal revenue: {opt_rev:.4f}") # For NL
 
 # Implement your method
 assortment = your_algorithm(data)
@@ -242,7 +247,7 @@ assortment = your_algorithm(data)
 # Evaluate
 revenue_fn = get_revenue_function_mmnl(data)  # or get_revenue_function_nl
 revenue = revenue_fn(assortment)[0]
-gap = (data.max_rev - revenue) / data.max_rev * 100
+gap = (opt_rev - revenue) / opt_rev * 100
 print(f"Your gap: {gap:.2f}%")
 ```
 

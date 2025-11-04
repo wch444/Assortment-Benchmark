@@ -10,6 +10,7 @@ class MMNLInstanceData:
     n: int  # Number of products
     seed: int  # Random seed
     max_rev: float  # Maximum revenue
+    best_ass: str
     cap_rate: float
     u: np.ndarray  # Utility matrix
     price: np.ndarray  # Price vector
@@ -38,6 +39,7 @@ def parse_config_to_instances_MMNL(config: Dict[str, Any]) -> List[MMNLInstanceD
 
         seeds = m_data['seeds']
         max_revs = m_data['max_rev']
+        best_ass_list = m_data.get('best_ass', [None] * len(seeds))
         cap_rate = m_data.get('cap_rate', 1.0)
         data_list = m_data['data']
 
@@ -51,6 +53,7 @@ def parse_config_to_instances_MMNL(config: Dict[str, Any]) -> List[MMNLInstanceD
                 seed=seed,
                 cap_rate=cap_rate,
                 max_rev=max_revs[i],
+                best_ass=best_ass_list[i],
                 u=np.array(data_dict['u']),
                 price=np.array(data_dict['price']),
                 v0=np.array(data_dict['v0']),
@@ -83,7 +86,9 @@ class NLInstanceData:
     m: int  # Number of nests
     n: int  # Number of products per nest
     seed: int  # Random seed
-    max_rev: float  # Maximum revenue
+    upper_bound: float  # Upper bound on revenue
+    best_rev: float  # Maximum revenue
+    best_ass: str #best assortment
     cap_rate: float  # Capacity rate
     v: np.ndarray  # Utility matrix (m x n)
     price: np.ndarray  # Price matrix (m x n)
@@ -113,7 +118,9 @@ def parse_config_to_instances_NL(config: Dict[str, Any]) -> List[NLInstanceData]
         m = int(parts[1])  # Number of nests
         n = int(parts[0])  # Number of products per nest
         seeds = data_group['seeds']
-        max_revs = data_group['max_rev']
+        upper_bounds = data_group['upper_bound']
+        best_revs = data_group['best_rev']
+        best_ass_list = data_group.get('best_ass', [None] * len(seeds))
         cap_rate = data_group.get('cap_rate', 1.0)
         data_list = data_group['data']
         
@@ -131,9 +138,11 @@ def parse_config_to_instances_NL(config: Dict[str, Any]) -> List[NLInstanceData]
             instance = NLInstanceData(
                 m=m,
                 n=n,
-                seed=seed,
+                seed=seed, 
+                upper_bound=upper_bounds[i],
+                best_rev=best_revs[i],
+                best_ass=best_ass_list[i],
                 cap_rate=cap_rate,
-                max_rev=max_revs[i],
                 v=np.array(data_dict['v']),
                 price=np.array(data_dict['price']),
                 gamma=np.array(data_dict['gamma']),
