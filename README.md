@@ -297,8 +297,7 @@ Each instance contains:
 - **Problem parameters**: $m$, $n$, `cap_rate` (if applicable)
 - **Random seed**: For reproducibility
 - **Optimal revenue**: Optimal revenue (`max_rev` for MMNL) or upper bound (`upper_bound` for NL)
-- **Best-found revenues**: Maximum revenue obtained across all evaluations (`max_rev` for MMNL, `best_rev` for NL)
-- **Corresponding assortment**: Corresponding assortment (`best_ass`)
+- **Best method result**: Maximum revenue obtained across all evaluations (`max_rev` for MMNL, `best_rev` for NL), and corresponding assortment (`best_ass`)
 - **Related data**: `u`, `price`, `v0`, `omega` (for MMNL); `price`, `v`, `gamma`, `v0`, `vi0` (for NL)
 
 ---
